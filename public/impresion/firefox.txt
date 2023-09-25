@@ -1,0 +1,12 @@
+
+1.-en barra de direccción
+    about:config
+2.-Buscar print.always_print_silent  =>  cambiar Value a  true
+   
+   si no existe , agregar :
+	Click derecho
+	Nuevo
+	Boolean
+
+Reiniciar 
+	

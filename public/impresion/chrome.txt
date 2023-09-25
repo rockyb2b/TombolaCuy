@@ -1,0 +1,3 @@
+reemplazar  destino en acceso directo
+
+"C:\Program Files (x86)\Google\Chrome\Application\chrome.exe" --kiosk-printing https://localhost:188/
