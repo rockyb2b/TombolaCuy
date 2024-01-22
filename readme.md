@@ -67,30 +67,35 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+php artisan migrate
+php artisan db:seed
 
 
-
+---------------------------------------------------------------------------------------------
 git clone 
 composer install
 copy .env
 php artisan key:generate
-php artisan migrate
-php artisan db:seed
 
-php artisan command:name2   GENERA EVENTOS
+
+bd_s3k_tombolacuy_inicial.sql
+
+ALTER TABLE `users` ADD `session_id` VARCHAR(255) NOT NULL AFTER `fecha_registro`;
+ALTER TABLE `ticket` ADD `PremioMaximoPagar` DECIMAL NOT NULL AFTER `fechaRegistro`;
+ALTER TABLE `ticket` ADD `PremioMaximoPotencial` DECIMAL NOT NULL AFTER `PremioMaximoPagar`;
+ALTER TABLE `apuesta` ADD `multiplicadorDefecto` DECIMAL NOT NULL AFTER `ZonaComercial`;
+
+
+<!-- php artisan command:name2   GENERA EVENTOS
 php artisan command:name3   genera ganadores
-php artisan command:name1   activar eventos
+php artisan command:name1   activar eventos -->
+jobs.bat   
 
 php .\app\Http\Controllers\Api\servidor_websocket\iniciar_servidor.php
 
-tabla users  agregar col  "session_id"
 
 
 
-ALTER TABLE `ticket` ADD `PremioMaximoPagar` DECIMAL NOT NULL AFTER `fechaRegistro`;
-ALTER TABLE `ticket` ADD `PremioMaximoPotencial` DECIMAL NOT NULL AFTER `PremioMaximoPagar`;
-
-ALTER TABLE `apuesta` ADD `multiplicadorDefecto` DECIMAL NOT NULL AFTER `ZonaComercial`;
 
 
 
