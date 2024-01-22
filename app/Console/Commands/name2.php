@@ -2,26 +2,23 @@
 
 namespace App\Console\Commands;
 
-use App\Evento;
-use App\Juego;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
 
-class JobCommand1 extends Command
+class name2 extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'command:name1';
+    protected $signature = 'command:name';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Activador Eventos';
+    protected $description = 'Command description';
 
     /**
      * Create a new command instance.
@@ -40,10 +37,6 @@ class JobCommand1 extends Command
      */
     public function handle()
     {
-//        Evento::GenerarEventoJob();
-       for ($i = 0; $i < 80000000; $i++) {
-            sleep(1);
-            Evento::GenerarResultadoEvento_CambiarEstadoEvento();
-        }
+        //
     }
 }

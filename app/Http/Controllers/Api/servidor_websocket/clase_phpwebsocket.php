@@ -9,7 +9,7 @@
 // Usage: $master=new WebphpWebSocketSocket("localhost",12345);
 
 function probarconexion_mysql(){
-  try{
+  try{  
       $mysqli = new mysqli( $GLOBALS['servername'],  $GLOBALS['username'] ,   $GLOBALS['password'],$GLOBALS['db']);
       if ($mysqli->connect_errno) {
           printf("Conexión  falló: %s\n", $mysqli->connect_error);

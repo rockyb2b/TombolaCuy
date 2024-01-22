@@ -7,13 +7,14 @@ $server_ip="10.128.0.2";  //what is the IP of your server
 $server_ip="192.168.12.154";  //what is the IP of your server
 $server_ip="192.168.1.7";  //what is the IP of your server
 $server_ip="192.168.1.7";  //what is the IP of your server
-$puerto=888;
+$server_ip="127.0.0.1";  //what is the IP of your server
+$puerto = 889;
 
 
 /////SQL
 $GLOBALS['servername'] = "127.0.0.1";
 $GLOBALS['username'] = "root";
-$GLOBALS['password'] = "123456";
+$GLOBALS['password'] = "";
 $GLOBALS['db'] = "bd_s3k_tombolacuy_inicial";
 
 probarconexion_mysql();
