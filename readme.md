@@ -73,10 +73,10 @@ php artisan db:seed
 
 ---------------------------------------------------------------------------------------------
 git clone 
-composer install
 copy .env
-php artisan key:generate
 
+
+create database bd_s3k_tombolacuy_inicial
 
 bd_s3k_tombolacuy_inicial.sql
 
@@ -85,17 +85,30 @@ ALTER TABLE `ticket` ADD `PremioMaximoPagar` DECIMAL NOT NULL AFTER `fechaRegist
 ALTER TABLE `ticket` ADD `PremioMaximoPotencial` DECIMAL NOT NULL AFTER `PremioMaximoPagar`;
 ALTER TABLE `apuesta` ADD `multiplicadorDefecto` DECIMAL NOT NULL AFTER `ZonaComercial`;
 
+composer install     composer update
+php artisan key:generate
 
+httpd.conf
+Listen 8000
+
+"C:\xampp7_2_34\apache\conf\extra\httpd-vhosts.conf"
+    <VirtualHost *:8000>
+        ServerAdmin webmaster@dummy-host2.example.com
+        DocumentRoot "C:\xampp7_3_33\htdocs\TombolaCuy\public"
+        ServerName dummy-host2.example.com
+        ErrorLog "logs/dummy-host2.example.com-error.log"
+        CustomLog "logs/dummy-host2.example.com-access.log" common
+    </VirtualHost>
+
+habilitar extension  sockets  en PHP.INI
+
+htttpd.ssl  port 443
 <!-- php artisan command:name2   GENERA EVENTOS
 php artisan command:name3   genera ganadores
 php artisan command:name1   activar eventos -->
 jobs.bat   
 
 php .\app\Http\Controllers\Api\servidor_websocket\iniciar_servidor.php
-
-
-
-
 
 
 
