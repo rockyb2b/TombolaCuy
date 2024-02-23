@@ -75,7 +75,6 @@ php artisan db:seed
 git clone 
 copy .env
 
-
 create database bd_s3k_tombolacuy_inicial
 
 bd_s3k_tombolacuy_inicial.sql
@@ -106,14 +105,11 @@ htttpd.ssl  port 443
 <!-- php artisan command:name2   GENERA EVENTOS
 php artisan command:name3   genera ganadores
 php artisan command:name1   activar eventos -->
-jobs.bat   
-
-php .\app\Http\Controllers\Api\servidor_websocket\iniciar_servidor.php
-
+jobs.bat   --> GENERAR EVENTOS , GANADORES , ACTIVA EVENTOS.
+php .\app\Http\Controllers\Api\servidor_websocket\iniciar_servidor.php  --> INICIAR SERVIDOR WEBSOCKETS
 
 
 
-
-
-
-EJECUTAR   jobs.bat
+cmds :
+    jobs.bat
+    php .\app\Http\Controllers\Api\servidor_websocket\iniciar_servidor.php

@@ -426,22 +426,22 @@ function frame_encode($message) {
   }
   public function GanadorEvento($idEvento){
       try{
-          $conn = new mysqli(  $GLOBALS['servername'],  $GLOBALS['username'] ,   $GLOBALS['password'],   $GLOBALS['db']);
-          if ($conn->connect_error) {
-            die("Connection failed: " . $conn->connect_error);
-          }
-          $sql_resultado="select valorGanador from resultado_evento as res where res.idEvento=".$idEvento." group by valorGanador";
-          $result = $conn->query($sql_resultado);
-          if ($result->num_rows > 0) {
-              while($row = $result->fetch_assoc()) {
-                  $resultados_evento[] = $row;
-              }
-          } else {
-              echo "No hay Resultado de Evento ".$idEvento;
-          }
-          $conn->close();
+        $conn = new mysqli(  $GLOBALS['servername'],  $GLOBALS['username'] ,   $GLOBALS['password'],   $GLOBALS['db']);
+        if ($conn->connect_error) {
+          die("Connection failed: " . $conn->connect_error);
+        }
+        $sql_resultado = "SELECT valorGanador FROM resultado_evento AS res WHERE res.idEvento=".$idEvento." GROUP BY valorGanador";
+        $result = $conn->query($sql_resultado);
+        if ($result->num_rows > 0) {
+            while($row = $result->fetch_assoc()) {
+                $resultados_evento[] = $row;
+            }
+        } else {
+            echo "No hay Resultado de Evento ".$idEvento;
+        }
+        $conn->close();
       }catch(Exception $ex){
-            echo $ex->getMessage();
+        echo $ex->getMessage();
       }
       if(isset($resultados_evento)){
           $resultados = $resultados_evento;
@@ -450,85 +450,84 @@ function frame_encode($message) {
         }
       return $resultados;
   }
-   public function getEventoActual($idJuego)
-    {
-
-        $IdJuego = $idJuego;
-        try{
-              $conn = new mysqli($GLOBALS['servername'],  $GLOBALS['username'] ,   $GLOBALS['password'],   $GLOBALS['db']);
-              if ($conn->connect_error) {
-                  die("Connection failed: " . $conn->connect_error);
-              }
-              $sql = "select * from evento as ev left join juego as j on j.idJuego = ev.idJuego    where j.idJuego=".$idJuego." and ev.EstadoEvento=1";
-              ///////select evento  con idJuego y estadoevento=1
-              $result = $conn->query($sql);
-              if ($result->num_rows > 0) {
-                  while($row = $result->fetch_assoc()) {
-                      $evento_activo[] = $row;
-                  }
-                  $idEvento=$evento_activo[0]["idEvento"];
-              } else {
-                  echo "No hay eventos de Juego Tipo ".$idJuego." activos";
-              }
-              $conn->close();
-        }catch(Exception $ex){
-             echo $ex->getMessage();
-             $evento_activo=null;
+  public function getEventoActual($idJuego)
+  {
+      $IdJuego = $idJuego;
+      try{
+        $conn = new mysqli($GLOBALS['servername'],  $GLOBALS['username'] ,   $GLOBALS['password'],   $GLOBALS['db']);
+        if ($conn->connect_error) {
+            die("Connection failed: " . $conn->connect_error);
         }
-
-        if(isset($evento_activo)){
-          $evento_actual = $evento_activo[0];
-        }
-        else{
-            $evento_actual=null;          
-        }
-        // $resultado_evento=$this->ResultadoEvento($IdJuego);
-        // $estadistica= $this->Estadistica($IdJuego);
-        if ($evento_actual != null) {
-            $ganador=$this->GanadorEvento($idEvento);
-            $ganador=$ganador[0];
-          // print_r($evento_actual);
-           // print_r($ganador);
-            $fecha_ini_actual = $evento_actual["fechaEvento"];
-            $fecha_fin_actual = $evento_actual["fechaFinEvento"];
-            $segundos_agregados = $evento_actual["segBloqueoAntesAnimacion"];
-            $fecha_animacion = date("Y-m-d H:i:s a", strtotime('-'.$segundos_agregados.' seconds', strtotime($fecha_fin_actual)));
-            //animacion=>fechafin-segBloqueoAntesAnimacion
-     
-           
-            $array_evento = [
-                // 'resultado_evento' => $resultado_evento,
-                // 'estadistica' => $estadistica,
-                'fecha_evento_ini_actual' => $fecha_ini_actual,
-                'fecha_evento_fin_actual' => $fecha_fin_actual,
-                'fecha_animacion' => $fecha_animacion,
-                'evento_id_actual' => $evento_actual["idEvento"],
-                'evento_valor_ganador' => $ganador["valorGanador"],
-                'segBloqueoAntesAnimacion' => $segundos_agregados,
-                'segCajaGirando' => $evento_actual["segCajaGirando"],
-                'puntos_cuy'=> $evento_actual["puntosCuy"]// $this->generar_posiciones_random()
-            ];
-            return json_encode([
-                'evento' => $array_evento, 'hora_servidor'=>date("Y-m-d H:i:s")
-            ]);
+        $sql = "SELECT * FROM evento AS ev LEFT JOIN juego AS j ON j.idJuego = ev.idJuego WHERE j.idJuego=".$idJuego." AND ev.EstadoEvento = 1";
+        ///////select evento  con idJuego y estadoevento=1
+        $result = $conn->query($sql);
+        if ($result->num_rows > 0) {
+            while($row = $result->fetch_assoc()) {
+                $evento_activo[] = $row;
+            }
+            $idEvento=$evento_activo[0]["idEvento"];
         } else {
-            $array_evento = [
-                //   'resultado_evento' => $resultado_evento,
-                // 'estadistica' => $estadistica,
-                'estado_animacion' => '',
-                'fecha_evento_ini_actual' => '',
-                'fecha_evento_fin_actual' => '',
-                'fecha_animacion' => '',
-                'evento_id_actual' => '',
-                'evento_valor_ganador' => '',
-                'segBloqueoAntesAnimacion' => '',
-                'segCajaGirando' => ''
-
-            ];
-            return json_encode([
-                'evento' => $array_evento, 'hora_servidor'=>date("Y-m-d H:i:s")
-            ]);
+            echo "No hay eventos de Juego Tipo ".$idJuego." activos";
         }
+        $conn->close();
+      }catch(Exception $ex){
+        echo $ex->getMessage();
+        $evento_activo = null;
+      }
+
+      if(isset($evento_activo)){
+        $evento_actual = $evento_activo[0];
+      }
+      else{
+        $evento_actual=null;          
+      }
+      // $resultado_evento=$this->ResultadoEvento($IdJuego);
+      // $estadistica= $this->Estadistica($IdJuego);
+      if ($evento_actual != null) {
+          $ganador = $this->GanadorEvento($idEvento);
+          $ganador = $ganador[0];
+        // print_r($evento_actual);
+          // print_r($ganador);
+          $fecha_ini_actual = $evento_actual["fechaEvento"];
+          $fecha_fin_actual = $evento_actual["fechaFinEvento"];
+          $segundos_agregados = $evento_actual["segBloqueoAntesAnimacion"];
+          $fecha_animacion = date("Y-m-d H:i:s a", strtotime('-'.$segundos_agregados.' seconds', strtotime($fecha_fin_actual)));
+          //animacion=>fechafin-segBloqueoAntesAnimacion
+    
+          
+          $array_evento = [
+              // 'resultado_evento' => $resultado_evento,
+              // 'estadistica' => $estadistica,
+              'fecha_evento_ini_actual' => $fecha_ini_actual,
+              'fecha_evento_fin_actual' => $fecha_fin_actual,
+              'fecha_animacion' => $fecha_animacion,
+              'evento_id_actual' => $evento_actual["idEvento"],
+              'evento_valor_ganador' => $ganador["valorGanador"],
+              'segBloqueoAntesAnimacion' => $segundos_agregados,
+              'segCajaGirando' => $evento_actual["segCajaGirando"],
+              'puntos_cuy'=> $evento_actual["puntosCuy"]// $this->generar_posiciones_random()
+          ];
+          return json_encode([
+              'evento' => $array_evento, 'hora_servidor'=>date("Y-m-d H:i:s")
+          ]);
+      } else {
+          $array_evento = [
+              //   'resultado_evento' => $resultado_evento,
+              // 'estadistica' => $estadistica,
+              'estado_animacion' => '',
+              'fecha_evento_ini_actual' => '',
+              'fecha_evento_fin_actual' => '',
+              'fecha_animacion' => '',
+              'evento_id_actual' => '',
+              'evento_valor_ganador' => '',
+              'segBloqueoAntesAnimacion' => '',
+              'segCajaGirando' => ''
+
+          ];
+          return json_encode([
+              'evento' => $array_evento, 'hora_servidor'=>date("Y-m-d H:i:s")
+          ]);
+      }
     }
 
 

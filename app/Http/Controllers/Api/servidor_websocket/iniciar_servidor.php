@@ -3,13 +3,9 @@
 // Run from command prompt > php -q ws_server.php
 include "clase_phpwebsocket.php";
 
-$server_ip="10.128.0.2";  //what is the IP of your server
-$server_ip="192.168.12.154";  //what is the IP of your server
-$server_ip="192.168.1.7";  //what is the IP of your server
-$server_ip="192.168.1.7";  //what is the IP of your server
-$server_ip="127.0.0.1";  //what is the IP of your server
+$server_ip = "127.0.0.1";  //what is the IP of your server
+$server_ip = "192.168.0.101";  //what is the IP of your server
 $puerto = 889;
-
 
 /////SQL
 $GLOBALS['servername'] = "127.0.0.1";
@@ -22,7 +18,7 @@ probarconexion_mysql();
 class ws_server extends phpWebSocket{
   //Overridden process function from websocket.class.php
   function process($user,$msg){
-    $c=0;
+    $c = 0;
     $this->say("(user: ".$user->id.") msg> ".$msg);
     //$this->say("< ".$msg);
     date_default_timezone_set('America/Lima');
@@ -38,18 +34,21 @@ class ws_server extends phpWebSocket{
      case "id" :  $this->send($user->socket,"Id: ".$user." \r\n","id");    break;
      case "conectados" :  $this->send($user->socket,"Usuarios Conectados: ".count($this->users));    break;
      case "users":  $list=" \r\nUsuarios: \r\n";
-            foreach($this->users as $u)
-               $list.=" #".++$c.".- $u \r\n";
-            $this->send($user->socket,$list); 
-           break;
-          
+        foreach($this->users as $u)
+            $list .= " #" .++$c . ".- $u \r\n";
+        $this->send($user->socket,$list); 
+        break;
      case "bye"   : $this->send($user->socket,"bye");                               
-            $this->disconnect($user->socket);
-            break;
+        $this->disconnect($user->socket);
+        break;
+     case "eventoJSON": 
+        $evento_actual = $this->getEventoActual(1);
+        $this->sendJSON($user,$evento_actual,"eventoJSON");
+        break;
 
-     case "eventoJSON":  $evento_actual=$this->getEventoActual(1);$this->sendJSON($user,$evento_actual,"eventoJSON"); break;
-
-      default      : $this->send($user->socket,$msg." not understood - ".date("H:i:s") );              break;
+      default:
+        $this->send($user->socket,$msg." not understood - ".date("H:i:s") );
+        break;
     }
   }
 }  //end class

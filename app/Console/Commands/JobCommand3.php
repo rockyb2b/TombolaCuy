@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Evento;
 use App\ResultadoEvento;
 use App\TipoApuesta;
+use App\Random\Brandom;
 use Illuminate\Console\Command;
 
 class JobCommand3 extends Command
@@ -40,10 +41,12 @@ class JobCommand3 extends Command
      */
     public function handle()
     {
+        $random = new BRandom();
         $eventos = Evento::EventosDiaActualGenerados();
         $lista = [];
         foreach ($eventos as $e) {
-            $numero_random = rand(0, 36);
+            // $numero_random = rand(0, 36);
+            $numero_random = $random->IRandom(0, 36);
             $totalValorGanador = ResultadoEvento::ValidarCantidadValorGanadorEvento($e->idEvento);
             if(count($totalValorGanador) == 0){
                 $lista [] = [
