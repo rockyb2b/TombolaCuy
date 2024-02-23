@@ -21,11 +21,7 @@ class BRandom
             }
         }
 
-        $interval = $max - $min + 1;
-        $longran = $this->BRandom_t() * $interval;
-        $iran = $longran >> 32;
-
-        return $iran + $min;
+        return mt_rand($min, $max);
     }
 
     private function BRandom_t()
