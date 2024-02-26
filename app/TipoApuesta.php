@@ -51,9 +51,9 @@ class TipoApuesta extends Model
 
     public static function TipoApuestaColor($NumeroGenerado, $idEvento)
     {
-        $tipo_apuesta = DB::table('tipo_apuesta as t')
+        $tipo_apuesta = DB::table('tipo_apuesta AS t')
             ->select('t.*', 'tp.multiplicadorDefecto')
-            ->join('tipo_pago as tp', 'tp.idTipoPago', 't.idTipoPago')
+            ->join('tipo_pago AS tp', 'tp.idTipoPago', 't.idTipoPago')
             ->where('t.valorapuesta', '=', $NumeroGenerado)
             ->get();
 
@@ -146,7 +146,6 @@ class TipoApuesta extends Model
             $resultado->idTipoApuesta = $apuesta->idTipoApuesta;
             $resultado->save();
         }
-
 
         $color_valorGenerado = DB::table('tipo_apuesta as t')
             ->select('t.*', 'tp.multiplicadorDefecto')

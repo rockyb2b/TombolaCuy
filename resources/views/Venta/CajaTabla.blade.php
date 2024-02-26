@@ -267,6 +267,7 @@
                                                 <div class="apuestasadicionales_titulo_div">APUESTAS ADICIONALES</div>
                                             </div>
                                             <div class="apuestasadicionalescontenedor" >
+                                                <?php if(count($coloresfila) > 0){ ?>
                                                 <div class="apuestacondicional_fila">
                                                     <div class="apuestacondicional_fila_nombre">COLORES</div>
                                                     <div class="apuestacondicional_fila_datos">
@@ -290,8 +291,11 @@
                                                          @endforeach
                                                     </div>      
                                                 </div>
-                                                <div class="apuestacondicional_fila">
-                                                    <div class="apuestacondicional_fila_nombre">RANGOS</div>
+                                                <?php }?>
+
+                                                <?php if(count($rangosfila) > 0){ ?>
+                                                <div class="apuestacondicional_fila" style="" >
+                                                    <div class="apuestacondicional_fila_nombre">RANGOS <?php echo count($rangosfila);?></div>
                                                     <div class="apuestacondicional_fila_datos">
                                                          @foreach($rangosfila as $div) 
                                                              <div 
@@ -310,8 +314,10 @@
                                                          @endforeach
                                                     </div>      
                                                 </div>
-                                                 <div class="apuestacondicional_fila">
+                                                <?php }?>
 
+                                                <?php if(count($par_imparfila) > 0){ ?>
+                                                 <div class="apuestacondicional_fila">
                                                      <div class="apuestacondicional_fila_nombre">PAR/IMPAR</div>
                                                      <div class="apuestacondicional_fila_datos">
                                                              @foreach($par_imparfila as $div) 
@@ -331,6 +337,7 @@
                                                              @endforeach
                                                      </div>     
                                                  </div>
+                                                <?php }?>
                                          <!-- <div class="rectangulo_rojo">1</div> -->
                                             </div>    
 
