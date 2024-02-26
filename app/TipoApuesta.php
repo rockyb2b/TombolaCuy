@@ -57,18 +57,24 @@ class TipoApuesta extends Model
             ->where('t.valorapuesta', '=', $NumeroGenerado)
             ->get();
 
+        $tipo_pago = DB::table('tipo_pago AS tp')
+            ->select('tp.idTipoPago')
+            ->whereIn('tp.estado', [1])
+            ->pluck('idTipoPago')
+            ->toArray();
+
         foreach ($tipo_apuesta as $apuesta) {
             $resultado = new ResultadoEvento();
             $resultado->idEvento = $idEvento;
             $resultado->multiplicadorApuestaGanada = $apuesta->multiplicadorDefecto;
             $resultado->valorGanador = $apuesta->valorapuesta;
-            $resultado->idTipoPago = $apuesta->idTipoPago;
+            $resultado->idTipoPago = $apuesta->idTipoPago;//1
             $resultado->estado = 1;
             $resultado->idTipoApuesta = $apuesta->idTipoApuesta;
             $resultado->save();
         }
 
-        if ($NumeroGenerado % 2 == 0 && $NumeroGenerado != 0) {
+        if ($NumeroGenerado % 2 == 0 && $NumeroGenerado != 0 && in_array(3 ,$tipo_pago) ) {//PAR
             $apuesta = DB::table('tipo_apuesta as t')
                 ->select('t.*', 'tp.multiplicadorDefecto')
                 ->join('tipo_pago as tp', 'tp.idTipoPago', 't.idTipoPago')
@@ -83,7 +89,7 @@ class TipoApuesta extends Model
             $resultado->idTipoApuesta = $apuesta->idTipoApuesta;
             $resultado->save();
         }
-        if ($NumeroGenerado % 2 !== 0 && $NumeroGenerado != 0) {
+        if ($NumeroGenerado % 2 !== 0 && $NumeroGenerado != 0 && in_array(3 ,$tipo_pago)) {//IMPAR
             $apuesta = DB::table('tipo_apuesta as t')
                 ->select('t.*', 'tp.multiplicadorDefecto')
                 ->join('tipo_pago as tp', 'tp.idTipoPago', 't.idTipoPago')
@@ -98,8 +104,8 @@ class TipoApuesta extends Model
             $resultado->idTipoApuesta = $apuesta->idTipoApuesta;
             $resultado->save();
         }
-        if ($NumeroGenerado >= 1 && $NumeroGenerado <= 12) {
-            //1-6
+        if ($NumeroGenerado >= 1 && $NumeroGenerado <= 12  && in_array(5 ,$tipo_pago)) {
+            //1-12
             $apuesta = DB::table('tipo_apuesta as t')
                 ->select('t.*', 'tp.multiplicadorDefecto')
                 ->join('tipo_pago as tp', 'tp.idTipoPago', 't.idTipoPago')
@@ -114,8 +120,8 @@ class TipoApuesta extends Model
             $resultado->idTipoApuesta = $apuesta->idTipoApuesta;
             $resultado->save();
         }
-        if ($NumeroGenerado >= 13 && $NumeroGenerado <= 24) {
-            //1-6
+        if ($NumeroGenerado >= 13 && $NumeroGenerado <= 24  && in_array(5 ,$tipo_pago)) {
+            //13-24
             $apuesta = DB::table('tipo_apuesta as t')
                 ->select('t.*', 'tp.multiplicadorDefecto')
                 ->join('tipo_pago as tp', 'tp.idTipoPago', 't.idTipoPago')
@@ -130,8 +136,8 @@ class TipoApuesta extends Model
             $resultado->idTipoApuesta = $apuesta->idTipoApuesta;
             $resultado->save();
         }
-        if ($NumeroGenerado >= 25 && $NumeroGenerado <= 36) {
-            //1-6
+        if ($NumeroGenerado >= 25 && $NumeroGenerado <= 36  && in_array(5 ,$tipo_pago)) {
+            //25-36
             $apuesta = DB::table('tipo_apuesta as t')
                 ->select('t.*', 'tp.multiplicadorDefecto')
                 ->join('tipo_pago as tp', 'tp.idTipoPago', 't.idTipoPago')

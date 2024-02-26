@@ -10,7 +10,7 @@ var archivos = ['images/glb/cuycaminando.glb', 'images/glb/cajagirando1.glb', 'i
 ];
 dt =0.03 // velocidad movimiento cuy
 dtrotacion = 0.05; // velocidad rotacion cuy;
-escalacuys = 0.25;
+escalacuys = 0.33;
 escalacajagirando = 1;
 intervalo_consultaevento=2000;
 buscando_evento=false;
