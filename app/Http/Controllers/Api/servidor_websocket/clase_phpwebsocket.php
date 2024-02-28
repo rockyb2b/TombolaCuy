@@ -25,11 +25,8 @@ function probarconexion_mysql(){
      $mysqli->close();
   }
   catch(Exception $ex){
-      echo "aca= ". $ex->getMessage();
+      echo "ac = ". $ex->getMessage();
   }
-    
-
-
 }
 
 class phpWebSocket{
@@ -38,22 +35,18 @@ class phpWebSocket{
   var $users   = array(); //create an array of users objects to handle discussions with users
   var $debug   = false;
 
-
-
-  
   function ascii_banner() //just for old-skool fun...
   {
-  $banner="               _    ____             _        _   \n";
-  $banner.=" __      _____| |__/ ___|  ___   ___| | _____| |_\n ";
-  $banner.="\ \ /\ / / _ \ '_ \___ \ / _ \ / __| |/ / _ \ __|\n";
-  $banner.="  \ V  V /  __/ |_) |__) | (_) | (__|   <  __/ |_ \n";
-  $banner.="   \_/\_/ \___|_.__/____/ \___/ \___|_|\_\___|\__|\n";
-  return $banner;
-                                                 
+    $banner="               _    ____             _        _   \n";
+    $banner.=" __      _____| |__/ ___|  ___   ___| | _____| |_\n ";
+    $banner.="\ \ /\ / / _ \ '_ \___ \ / _ \ / __| |/ / _ \ __|\n";
+    $banner.="  \ V  V /  __/ |_) |__) | (_) | (__|   <  __/ |_ \n";
+    $banner.="   \_/\_/ \___|_.__/____/ \___/ \___|_|\_\___|\__|\n";
+    return $banner;
   }
   
   function __construct($address,$port){
-  // error_reporting(E_ALL);
+    // error_reporting(E_ALL);
     set_time_limit(0);
     ob_implicit_flush();
 
@@ -68,10 +61,8 @@ class phpWebSocket{
     $this->say("Server Iniciado : ".date('Y-m-d H:i:s'));
     $this->say("Escuchando en   : ".$address." port ".$port);
     $this->say("Master socket  : ".$this->master."\n");
-    $this->say(".... Esperando Conexiones ...");
+    $this->say("......... Esperando Conexiones ...........");
 
-
-  
   // Main Server processing loop
     while(true)  //server is always listening
     {
@@ -79,260 +70,243 @@ class phpWebSocket{
       $write = array();
       $except = array();
       socket_select($changed,$write,$except,NULL);
-      $this->say("Escuchando... Conectados:".count($this->users)."\n");
+      //$this->say("Escuchando... Conectados : ".count($this->users)."\n");
       foreach($changed as $socket)
       {
-
-        if($socket==$this->master){
-          $client=socket_accept($this->master);
-          if($client<0){ $this->log("socket_accept() failed"); continue; }
-          else{ 
-            $this->connect($client); ///conectar cliente
+        if($socket == $this->master){
+          $client = socket_accept($this->master);
+          if($client < 0)
+          { 
+            $this->log("socket_accept() failed"); continue; 
+          }
+          else
+          { 
+            $this->connect($client); ///conectar 
           }
         }
-        else{///clientes 
-
+        else
+        {///clientes 
           $user = $this->getuserbysocket($socket);
-          $this->say("cliente ".$user);
-            $bytes = @socket_recv($socket,$buffer,2048,0);
-            if($bytes==0)
+          // $this->say("cliente ".$user);
+          $bytes = @socket_recv($socket,$buffer,2048,0);
+          if($bytes == 0)
+          { 
+            $this->say("disconnecting ".$user->id." ..." );
+            $this->disconnect($socket); ///cliente desconectado
+          }
+          else
+          {
+            $user = $this->getuserbysocket($socket);
+            if(!$user->handshake)
             { 
-                 $this->say("disconnect $user->id");
-
-             $this->disconnect($socket); ///cliente desconectado
+                // $this->say("Handshaking $user"." ...");
+                $this->dohandshake($user,$buffer);
             }
-            else{
-              $user = $this->getuserbysocket($socket);
-              if(!$user->handshake)
-              { 
-                 $this->say("Handshaking $user");
-                 $this->dohandshake($user,$buffer);
-                //$this->send($socket,date("h:i:s a"));
-
+            else
+            { 
+              $decode = $this->frame_decode($buffer);
+              if($decode  == "ping"){
+                  $this->disconnect($socket);
               }
-               else
-              { 
-                $decode=$this->frame_decode($buffer);
-                if($decode=="ping"){
-                   $this->disconnect($socket);
-                }else{
-                  $this->process($user,$decode ); 
-                }
-              } 
+              else
+              {
+                $this->process($user,$decode ); 
+              }
             }
+          }
         }
       } //foreach socket
     } //main loop
   } //function  __construct
-
   function process($user,$msg){
     /* Extend and modify this method to suit your needs */
     /* Basic usage is to echo incoming messages back to client */
      $this->send($user->socket,$msg);
   }
-  
-   function broadcast($msg){
+  function broadcast($msg){
      foreach($this->users as $user){ //send to ALL connected users
-       if(isset($user->socket)==true ) //confirm there's still a connection
+       if(isset($user->socket) == true ) //confirm there's still a connection
        $this->send($user->socket,$msg);
      } //end foreach
- }
-
- 
+  }
   function send_pong($user)
   {
    $bytesHeader[0] = 138; // 1xA Pong frame (FIN + opcode)
    $msg = implode(array_map("chr", $bytesHeader)) ;
    $this->send($user->socket,$msg);
   }
-  
   /**
  * Encode a text for sending to clients via ws://
  * @param $message
  * WebSocket frame 
- 
-+-+-+-+-+-------+-+-------------+-------------------------------+
-0                   1                   2                   3
-0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-+-+-+-+-+-------+-+-------------+-------------------------------+
-|F|R|R|R| opcode|M| Payload len |    Extended payload length    |
-|I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |
-|N|V|V|V|       |S|             |   (if payload len==126/127)   |
-| |1|2|3|       |K|             |                               |
-+-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
-|     Extended payload length continued, if payload len == 127  |
-+ - - - - - - - - - - - - - - - +-------------------------------+
-|                               |Masking-key, if MASK set to 1  |
-+-------------------------------+-------------------------------+
-| Masking-key (continued)       |          Payload Data         |
-+-------------------------------- - - - - - - - - - - - - - - - +
-:                     Payload Data continued ...                :
-+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
-|                     Payload Data continued ...                |
-+---------------------------------------------------------------+
- */
-function frame_encode($message) {
+  +-+-+-+-+-------+-+-------------+-------------------------------+
+  0                   1                   2                   3
+  0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+  +-+-+-+-+-------+-+-------------+-------------------------------+
+  |F|R|R|R| opcode|M| Payload len |    Extended payload length    |
+  |I|S|S|S|  (4)  |A|     (7)     |             (16/64)           |
+  |N|V|V|V|       |S|             |   (if payload len==126/127)   |
+  | |1|2|3|       |K|             |                               |
+  +-+-+-+-+-------+-+-------------+ - - - - - - - - - - - - - - - +
+  |     Extended payload length continued, if payload len == 127  |
+  + - - - - - - - - - - - - - - - +-------------------------------+
+  |                               |Masking-key, if MASK set to 1  |
+  +-------------------------------+-------------------------------+
+  | Masking-key (continued)       |          Payload Data         |
+  +-------------------------------- - - - - - - - - - - - - - - - +
+  :                     Payload Data continued ...                :
+  + - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - +
+  |                     Payload Data continued ...                |
+  +---------------------------------------------------------------+
+  */
+  function frame_encode($message) {
 
-    $length = strlen($message);
+      $length = strlen($message);
 
-    $bytesHeader = [];
-    $bytesHeader[0] = 129; // 0x1 text frame (FIN + opcode)
+      $bytesHeader = [];
+      $bytesHeader[0] = 129; // 0x1 text frame (FIN + opcode)
 
-    if ($length <= 125) {
-            $bytesHeader[1] = $length;
-    } else if ($length >= 126 && $length <= 65535) {
-            $bytesHeader[1] = 126;
-            $bytesHeader[2] = ( $length >> 8 ) & 255;
-            $bytesHeader[3] = ( $length      ) & 255;
-    } else {
-            $bytesHeader[1] = 127;
-            $bytesHeader[2] = ( $length >> 56 ) & 255;
-            $bytesHeader[3] = ( $length >> 48 ) & 255;
-            $bytesHeader[4] = ( $length >> 40 ) & 255;
-            $bytesHeader[5] = ( $length >> 32 ) & 255;
-            $bytesHeader[6] = ( $length >> 24 ) & 255;
-            $bytesHeader[7] = ( $length >> 16 ) & 255;
-            $bytesHeader[8] = ( $length >>  8 ) & 255;
-            $bytesHeader[9] = ( $length       ) & 255;
-    }
-   //apply chr against bytesHeader , then prepend to message
-    $str = implode(array_map("chr", $bytesHeader)) . $message;
-    return $str;
-} 
- 
- /**
- * frame_decode (decode data frame)  a received payload (websockets)
- * @param $payload  (Refer to: https://tools.ietf.org/html/rfc6455#section-5 )
- */
- function frame_decode($payload) 
- {
-  if (!isset($payload))
-    return null;  //empty data return nothing
+      if ($length <= 125) {
+              $bytesHeader[1] = $length;
+      } else if ($length >= 126 && $length <= 65535) {
+              $bytesHeader[1] = 126;
+              $bytesHeader[2] = ( $length >> 8 ) & 255;
+              $bytesHeader[3] = ( $length      ) & 255;
+      } else {
+              $bytesHeader[1] = 127;
+              $bytesHeader[2] = ( $length >> 56 ) & 255;
+              $bytesHeader[3] = ( $length >> 48 ) & 255;
+              $bytesHeader[4] = ( $length >> 40 ) & 255;
+              $bytesHeader[5] = ( $length >> 32 ) & 255;
+              $bytesHeader[6] = ( $length >> 24 ) & 255;
+              $bytesHeader[7] = ( $length >> 16 ) & 255;
+              $bytesHeader[8] = ( $length >>  8 ) & 255;
+              $bytesHeader[9] = ( $length       ) & 255;
+      }
+    //apply chr against bytesHeader , then prepend to message
+      $str = implode(array_map("chr", $bytesHeader)) . $message;
+      return $str;
+  } 
+  /**
+   * frame_decode (decode data frame)  a received payload (websockets)
+   * @param $payload  (Refer to: https://tools.ietf.org/html/rfc6455#section-5 )
+   */
+  function frame_decode($payload) 
+  {
+    if (!isset($payload))
+      return null;  //empty data return nothing
 
-    $length = ord($payload[1]) & 127;
+      $length = ord($payload[1]) & 127;
 
-    if($length == 126) {
-        $masks = substr($payload, 4, 4);
-        $data = substr($payload, 8);
-    }
-    elseif($length == 127) {
-        $masks = substr($payload, 10, 4);
-        $data = substr($payload, 14);
-    }
-    else {
-        $masks = substr($payload, 2, 4);
-        $data = substr($payload, 6);
-    }
+      if($length == 126) {
+          $masks = substr($payload, 4, 4);
+          $data = substr($payload, 8);
+      }
+      elseif($length == 127) {
+          $masks = substr($payload, 10, 4);
+          $data = substr($payload, 14);
+      }
+      else {
+          $masks = substr($payload, 2, 4);
+          $data = substr($payload, 6);
+      }
 
-  for ($i = 0; $i < strlen($masks); ++$i) {
-   // $this->say("header[".$i."] =". ord($masks[$i]). " \n");
-  }
-   //$this->say(" data:$data \n");
-   
-   //did we just get a PING frame
-   if (strlen($masks)==4 && strlen($data)==0) 
-   {
-    return "ping";
-    }
-  
-    $text = '';
-    for ($i = 0; $i < strlen($data); ++$i) {
-        $text .= $data[$i] ^ $masks[$i%4];
-    }
-    return $text;
-}  //end of frame_decode unmask(Received from client)
+      for ($i = 0; $i < strlen($masks); ++$i) {
+      }
+      //did we just get a PING frame
+      if (strlen($masks)==4 && strlen($data)==0) 
+      {
+        return "ping";
+      }
+    
+      $text = '';
+      for ($i = 0; $i < strlen($data); ++$i) {
+          $text .= $data[$i] ^ $masks[$i%4];
+      }
+      return $text;
+  }  //end of frame_decode unmask(Received from client)
 
-
-
-  function send($client,$msg){ 
-
+  function send($client,$msg)
+  { 
     $msg = $this->frame_encode($msg);
     socket_write($client, $msg);
-   // $this->say("> ".$msg." (".strlen($msg). " bytes) \n");
   } 
-    function sendJSON($client,$msg,$tipo){ 
-
-    $msg=json_encode(['id'=>$client->id,'tipo'=>$tipo,'mensaje'=>$msg ]);
+  function sendJSON($client,$msg,$tipo)
+  { 
+    $msg = json_encode(['id' => $client->id,'tipo' => $tipo,'mensaje' => $msg ]);
     $msg = $this->frame_encode($msg);
     socket_write($client->socket, $msg);
-   // $this->say("> ".$msg." (".strlen($msg). " bytes) \n");
   } 
-
   function connect($socket){
     $user = new User();
     $user->id = uniqid();
     $user->socket = $socket;
     array_push($this->users,$user);
     array_push($this->sockets,$socket);
-    $this->say($socket." id=".$user->id." CONECTADO!");
-
+    $this->say($socket." id = ".$user->id." CONECTADO!");
   }
 
   function disconnect($socket){
-    $found=null;
-    $n=count($this->users);
-    for($i=0;$i<$n;$i++){
-      if($this->users[$i]->socket==$socket){ $found=$i; break; }
+    $found = null;
+    $n = count($this->users);
+    for($i = 0;$i < $n; $i++){
+      if($this->users[$i]->socket == $socket){ 
+        $found = $i;
+        break; 
+      }
     }
     if(!is_null($found))
     { 
        array_splice($this->users,$found,1); 
     }
-    $index=array_search($socket,$this->sockets);
-    $usuario=$this->getuserbysocket($socket);
+    $index = array_search($socket,$this->sockets);
+    $usuario = $this->getuserbysocket($socket);
     socket_close($socket);
-    $this->say(" DISCONNECTED!  User count:".count( $this->users));
-    if($index>=0)
+    $this->say(" DISCONNECTED!  CONECTADOS : ".count( $this->users));
+    if($index >= 0)
     { 
        array_splice($this->sockets,$index,1); 
     }
   }
 
-   function calcKey($key1,$ws_magic_string)
-   {
+  function calcKey($key1,$ws_magic_string)
+  {
     $this->log("\n Calculating sec-key: [".$key1."] \n MagicString:".$ws_magic_string."\n");
     return base64_encode(SHA1($key1.$ws_magic_string,true));
   }
-   
   
   function dohandshake($user,$buffer){
-    //$this->say("\nWS Requesting handshake...");
     list($resource,$host,$origin,$key1,$key2,$l8b) = $this->getheaders($buffer);
     $ws_magic_string="258EAFA5-E914-47DA-95CA-C5AB0DC85B11";
-  //Calculate Accept = base64_encode( SHA1( key1 +attach magic_string ))
-   $accept=$this->calcKey($key1,$ws_magic_string);
-    
+    //Calculate Accept = base64_encode( SHA1( key1 +attach magic_string ))
+    $accept=$this->calcKey($key1,$ws_magic_string);
     /*
       Respond only when protocol specified in request header
       "Sec-WebSocket-Protocol: chat" . "\r\n" .
       */
-  $upgrade = "HTTP/1.1 101 Switching Protocols\r\n".
+    $upgrade = "HTTP/1.1 101 Switching Protocols\r\n".
                    "Upgrade: websocket\r\n".
                    "Connection: Upgrade\r\n".
             "WebSocket-Location: ws://" . $host . $resource . "\r\n" .
             "Sec-WebSocket-Accept: $accept".
                    "\r\n\r\n";
-          
     socket_write($user->socket,$upgrade);
-  //$this->say("Issuing websocket Upgrade \n");
-    $user->handshake=true;
+    //$this->say("Issuing websocket Upgrade \n");
+    $user->handshake = true;
   
-    $this->say("Listo handshaking... usuarios CONECTADOS:".count( $this->users));
+    $this->say("Listo handshaking..." .$user->id. ". CONECTADOS : ".count( $this->users));
     return  $user->handshake;
   }
   
-
   function getheaders($req){
-      $r=$h=$o=null;
+      $r = $h = $o = null;
       if(preg_match("/GET (.*) HTTP/"               ,$req,$match)){ $r=$match[1]; }
       if(preg_match("/Host: (.*)\r\n/"              ,$req,$match)){ $h=$match[1]; }
       if(preg_match("/Origin: (.*)\r\n/"            ,$req,$match)){ $o=$match[1]; }
       if(preg_match("/Sec-WebSocket-Key: (.*)\r\n/",$req,$match)){ 
-          // $this->say("WebSocket-Key: ".$sk1=$match[1]);
            $sk1=$match[1];
       }
       if(preg_match("/Sec-WebSocket-Version: (.*)\r\n/",$req,$match)){ 
-        //$this->say("WebSocket-Version: ".$sk2=$match[1]);
         $sk2=$match[1];
          }
       if($match=substr($req,-8)) 
@@ -342,31 +316,31 @@ function frame_encode($message) {
 
   //Search for a particular user's socket
   function getuserbysocket($socket){
-    $found=null;
+    $found = null;
     foreach($this->users as $user){
-      if($user->socket==$socket)
+      if($user->socket == $socket)
       { 
-        $found=$user; 
+        $found = $user; 
         break; 
       }
     }
     return $found;
   }
-////////////CONSULTAS
+  ////////////CONSULTAS
 
   public function ResultadoEvento($idJuego){
    $conn = new mysqli(  $GLOBALS['servername'],  $GLOBALS['username'] ,   $GLOBALS['password'],   $GLOBALS['db']);
     if ($conn->connect_error) {
       die("Connection failed: " . $conn->connect_error);
     }
-    $cantidad=12;
-    $consulta=" select e.idEvento, re.valorGanador,tipoapuesta.rgb,tipoapuesta.rgbLetra 
-                    from resultado_evento  as re
-                    left join evento as e  on e.idEvento=re.idEvento
-                    left join tipo_apuesta as tipoapuesta on tipoapuesta.idTipoApuesta=re.idTipoApuesta
-                      where e.idJuego=".$idJuego." and re.estado=1 and tipoapuesta.idTipoPago in (1,6)
-                       and e.estadoevento=2  
-                      order by re.idEvento desc limit ".$cantidad;
+    $cantidad = 12;
+    $consulta = " SELECT e.idEvento, re.valorGanador,tipoapuesta.rgb,tipoapuesta.rgbLetra 
+                    FROM resultado_evento  AS re
+                    LEFT JOIN evento AS e  ON e.idEvento=re.idEvento
+                    LEFT JOIN tipo_apuesta AS tipoapuesta ON tipoapuesta.idTipoApuesta=re.idTipoApuesta
+                    WHERE e.idJuego = ".$idJuego." and re.estado = 1 and tipoapuesta.idTipoPago in (1,6)
+                          AND e.estadoevento=2  
+                          order by re.idEvento desc limit ".$cantidad;
     $result = $conn->query($consulta);
     if ($result->num_rows > 0) {
         while($row = $result->fetch_assoc()) {
@@ -376,11 +350,13 @@ function frame_encode($message) {
         echo "No hay Datos ";
     }
     $conn->close();
-     if(isset($array_resultado)){
-        $rpta=$array_resultado;
-     }else{
-      $rpta=null;
-     }
+    if(isset($array_resultado)){
+      $rpta = $array_resultado;
+    }
+    else
+    {
+      $rpta = null;
+    }
       return $rpta;
   }
   public function Estadistica($idJuego){
@@ -389,17 +365,17 @@ function frame_encode($message) {
       die("Connection failed: " . $conn->connect_error);
     }
     $ultimoseventos_a_contar=120;
-    $consulta=" select ta.idTipoApuesta,
+    $consulta = "SELECT ta.idTipoApuesta,
                      ta.valorapuesta,
                     (
-                     select    count(rev.valorGanador)
+                     SELECT    count(rev.valorGanador)
                               FROM resultado_evento rev
                               where rev.idTipoApuesta=ta.idTipoApuesta
                               and rev.idEvento in 
                               (
-                                select eventos.idEvento from
+                                SELECT eventos.idEvento FROM
                                     (
-                                    select eventosub.idEvento from  evento as eventosub where eventosub.estadoEvento=2 
+                                    SELECT eventosub.idEvento FROM  evento as eventosub where eventosub.estadoEvento=2 
                                     and eventosub.idJuego=".$idJuego. " 
                                     order by eventosub.idEvento desc limit ".$ultimoseventos_a_contar."
                                     )
@@ -465,9 +441,9 @@ function frame_encode($message) {
             while($row = $result->fetch_assoc()) {
                 $evento_activo[] = $row;
             }
-            $idEvento=$evento_activo[0]["idEvento"];
+            $idEvento = $evento_activo[0]["idEvento"];
         } else {
-            echo "No hay eventos de Juego Tipo ".$idJuego." activos";
+            echo "NO HAY EVENTOS DE JUEGO TIPO ".$idJuego." activos\n";
         }
         $conn->close();
       }catch(Exception $ex){
@@ -542,15 +518,13 @@ class User{
   var $id;
   var $socket;
   var $handshake;
-  
-   function __construct()
-   {    //do stuff to initialize each user  
-   }
-  
+  function __construct()
+  {    //do stuff to initialize each user  
+  }
   public function __toString()
-  {  return "(User: ". $this->id." )";  }
-  
-  
+  {  
+    return "(User: ". $this->id." )";  
+  }
 }  //end of class User
 
 ?>

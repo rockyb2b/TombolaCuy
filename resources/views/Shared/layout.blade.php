@@ -27,7 +27,7 @@
 
     <!-- Favicon -->
     {{--<link rel="shortcut icon" href="../images/xampp.ico">--}}
-    <link rel="shortcut icon" href="{{asset('images/logoat.jpg')}}">
+    <link rel="shortcut icon" href="{{asset('images/logoat.png')}}">
     <!-- /Favicon -->
 
     <!-- AppleTouch Icons -->
@@ -95,20 +95,20 @@
             <!-- Brand -->
             {{--<a href="#" class="navbar-brand navbar-brand-cover">--}}
             {{--<div class="navbar-brand-big">--}}
-            {{--<img src="{{asset('images/logo.png')}}" alt="CasperoBoard">--}}
+            {{--<img src="{{asset('images/logocorp2b.png')}}" alt="CasperoBoard">--}}
             {{--</div>--}}
             {{--<div class="navbar-brand-small">--}}
-            {{--<img src="{{asset('images/logoat.jpg')}}" alt="CasperoBoard">--}}
+            {{--<img src="{{asset('images/logoat.png')}}" alt="CasperoBoard">--}}
             {{--</div>--}}
             {{--</a>--}}
 
             <a href="#" class="navbar-brand navbar-brand-cover">
                 <div class="navbar-brand-big" style="text-align: center;width: 100%;">
-                    <img src="{{url('../images/logo.png')}}" alt="logo apuesta total"
+                    <img src="{{url('../images/logocorp2b.png')}}" alt="logo apuesta total"
                          style="height: 40px;padding-top:5px;">
                 </div>
                 <div class="navbar-brand-small">
-                    <img src="{{url('../images/logoat.jpg')}}" alt="logo apuesa total" style="height: 49px;">
+                    <img src="{{url('../images/logoat.png')}}" alt="logo apuesa total" style="height: 49px;">
                 </div>
             </a>
 

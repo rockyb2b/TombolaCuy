@@ -11,17 +11,17 @@ $(document).ready(function () {
 });
 
 function INICIAR(){
-    /////////onClick de Juegos/Eventos 
+    /////////onClick de Juegos/Eventos
     $("#div_configuracioneventos .configuracioneventosdiv").off("click").on("click",function(){
         $(".TOMBOLACUY").css("cursor","wait");
-                $("#div_configuracioneventos .configuracioneventosdiv").removeClass("seleccionadoevento");
-                $(this).addClass("seleccionadoevento");
-                detenerHistorialJackpot();
-                DETENER_HISTORIALJACKPOT = false;
-                $(".nombre_tituloconfiguracionevento ").text($(this).data("nombre"));
-                $(".id_tituloconfiguracionevento ").text("#"+$(this).data("id"));
-                EventoDatosJsonNuevo(this,$(this).data("id"),$("#idPuntoVenta").val(),$(this).data("segbloqueoantesevento"));
-                $("#modal_imprimir #divimpresion .imagen img").attr("src","img/juegos/"+$(this).data("logo"))
+        $("#div_configuracioneventos .configuracioneventosdiv").removeClass("seleccionadoevento");
+        $(this).addClass("seleccionadoevento");
+        detenerHistorialJackpot();
+        DETENER_HISTORIALJACKPOT = false;
+        $(".nombre_tituloconfiguracionevento ").text($(this).data("nombre"));
+        $(".id_tituloconfiguracionevento ").text("#"+$(this).data("id"));
+        EventoDatosJsonNuevo(this,$(this).data("id"),$("#idPuntoVenta").val(),$(this).data("segbloqueoantesevento"));///socket conecta , pide hora
+        $("#modal_imprimir #divimpresion .imagen img").attr("src","img/juegos/"+$(this).data("logo"))
     })
     //// FIN  Onclick eventos
     setTimeout(function(){

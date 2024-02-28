@@ -141,6 +141,10 @@ Route::get('AnimacionVista', 'AnimacionController@AnimacionVista')->name('Animac
 Route::post('DatosEstadisticaFK', 'AnimacionController@DatosEstadistica');
 /*GenerarExcel*/
 
+/////VISTA CLIENTE VENTA
+Route::get('ClienteVista', 'ClienteVistaController@ClienteVista')->name('ClienteVenta');
+/////////////////////////
+
 Route::post('GenerarExcelFk', 'HomeController@GenerarExcel');
 Route::post('GenerarArchivoExcelJackpotFk', 'HomeController@GenerarArchivoExcelJackpot');
 

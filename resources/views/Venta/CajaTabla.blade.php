@@ -1,5 +1,5 @@
        
-<DIV CLASS="CONTENEDOR_TOMBOLACUY">
+<DIV CLASS="CONTENEDOR_TOMBOLACUY" style="<?php  if(isset($style_contenedor)){ echo $style_contenedor;}?> ">
          <div class="row" style="display:none">
             <div class="col-md-12">
                 <div class="panel panel-primary">
@@ -15,7 +15,7 @@
                             </div>
                             <div class="col-md-5 col-xs-12 col-sm-12">
                                 <!-- <div class="row"> -->
-                                <?php if($aperturacajadatos==null){?>
+                                <?php if($aperturacajadatos == null){?>
                                         <button class="btn btn-primary  pull-right" style="float: right;" id="apertura_de_caja" onClick="CargarAperturaCaja()">AP. DE CAJA</button> 
                                  <?php }
                                  else{ ?>
@@ -399,7 +399,7 @@
                                             </div>
                                         </div>
                                     </div>
-            <!--rowtableeventos_footer-->
+                             <!--rowtableeventos_footer-->
                                     <div class="rowapuestas" id="div_apuestas">
                                          @foreach($dinerodefault as $apuesta) 
                                              <div class="rowapuestasdiv" 
@@ -477,23 +477,15 @@
                         </div><!--JUEGO TOMBOLACUY-->
 </DIV>
 <?php //}?>
-
-    @include('Venta.ModalesCajaTabla');
-
-
-
+@include('Venta.ModalesCajaTabla');
 <!-- </div>
-
-
 </div> -->
 <!--FIN  panel-body-->
 <!-- 
 </div>
-
 </div> -->
 <?  //php }?>
 <!-- </div> -->
-
 @push('Js')
 <!-- <?php if($error!=""){?>
     <script>toastr.error("<?php echo $error;?>")</script>
