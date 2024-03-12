@@ -1,40 +1,56 @@
-IPSERVIDOR_WEBSOCKETS = $("#IPSERVIDOR_WEBSOCKETS").val();
-PUERTO_WEBSOCKETS = $("#PUERTO_WEBSOCKETS").val();
+$(document).ready(function () {   
 
-USUARIO = $(".user-name").text();
-CC_ID = $("#cc_id").val();
-IDAPERTURACAJA = $("#idAperturaCaja").val();
-
-$(document).ready(function () {
-  $("body").css("overflow","hidden")
-    INICIAR();
+    $("body").css("overflow","hidden");
+    // INICIAR();
+    EventoActual();
 });
 
-function INICIAR(){
+function INICIAR(evento = null)
+{
+    $(".TOMBOLACUY").show();
     /////////onClick de Juegos/Eventos
-    $("#div_configuracioneventos .configuracioneventosdiv").off("click").on("click",function(){
-        $(".TOMBOLACUY").css("cursor","wait");
-        $("#div_configuracioneventos .configuracioneventosdiv").removeClass("seleccionadoevento");
-        $(this).addClass("seleccionadoevento");
-        detenerHistorialJackpot();
-        DETENER_HISTORIALJACKPOT = false;
-        $(".nombre_tituloconfiguracionevento ").text($(this).data("nombre"));
-        $(".id_tituloconfiguracionevento ").text("#"+$(this).data("id"));
-        EventoDatosJsonNuevo(this,$(this).data("id"),$("#idPuntoVenta").val(),$(this).data("segbloqueoantesevento"));///socket conecta , pide hora
-        $("#modal_imprimir #divimpresion .imagen img").attr("src","img/juegos/"+$(this).data("logo"))
-    })
+    // var divs_juego = $("#div_configuracioneventos .configuracioneventosdiv");
+    // divs_juego.off("click").on("click",function(){
+    //     $(".TOMBOLACUY").css("cursor","wait");
+    //     divs_juego.removeClass("seleccionadoevento");
+    //     $(this).addClass("seleccionadoevento");    
+        
+    //     detenerHistorialJackpot();
+    //     //DETENER_HISTORIALJACKPOT = false;
+    //     EventoDatosJsonNuevo(this);/// pide hora        
+    // })
     //// FIN  Onclick eventos
     setTimeout(function(){
         $("#div_configuracioneventos .eventos_fila_izq>div").eq(0).click();
     },5)
 
-    eventos_botones(); ////botones 1-22, rangos, colores ,  botones apuestas(1,2,4,5,10,20,50,100)  , botones check, x, buscar,imprimir
-    eventos_botones_modalbuscar(); ///botones del modal buscar=>  1-9 , buscar
-    $(".TOMBOLACUY").show();
+    eventos_botones(evento); ////botones 1-22, rangos, colores ,  botones apuestas(1,2,4,5,10,20,50,100)  , botones check, x, buscar,imprimir
+    eventos_botones_modalbuscar(evento); ///botones del modal buscar=>  1-9 , buscar
     responsivetombola();
     $(window).resize(function () {
         responsivetombola();
-        heighttbody = $(".rowtablaeventos").height()-$("#tabla_eventos thead").height();
+        var heighttbody = $(".rowtablaeventos").height()-$("#tabla_eventos thead").height();
         $("#tabla_eventos tbody").height(heighttbody);
     }).trigger('resize');
-} ////*Fin INICIAR*/
+
+
+    
+    // eventoactual = {};
+    // eventoactual.FechaEvento    = $(divelemento).attr("data-FechaEvento");
+    // eventoactual.fechaFinEvento = $(divelemento).attr("data-fechaFinEvento");
+    // eventoactual.nombre         = $(divelemento).attr("data-nombre");
+    // eventoactual.IdEvento       = $(divelemento).attr("data-id");
+    // eventoactual.apuestaMinima  = $(divelemento).attr("data-apuestaMinima");
+    // eventoactual.apuestaMaxima  = $(divelemento).attr("data-apuestaMaxima");
+
+    // eventoactual.apuestaMinimaJuego = $(divelemento).attr("data-apuestaMinimaJuego");
+    // eventoactual.apuestaMaximaJuego = $(divelemento).attr("data-apuestaMaximaJuego");
+
+    // eventoactual.segBloqueoAntesEvento = OPCIONES_VENTA_VISTA.SEGBLOQUEOANTESEVENTO;
+    // eventoactual.idMoneda = $(divelemento).attr("data-idMoneda");
+    // eventoactual.Imagen = "img/juegos/"+$(divelemento).attr("data-logo");
+    // eventoactual.divisa = $(divelemento).attr("data-divisa");
+
+    EventoDatosJsonNuevo(evento);/// pide hora        
+
+}

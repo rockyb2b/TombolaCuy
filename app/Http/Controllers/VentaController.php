@@ -422,7 +422,6 @@ class VentaController extends Controller
         ]);
     }
 
-
     public function BuscarTicket(Request $request)
     {
         $respuesta = false;
@@ -684,8 +683,6 @@ public function Cancelar_Ticket(Request $request){
         $mensaje_error = "";
         $idEvento = $request->input("idEvento");
         $idPuntoVenta = $request->input("idPuntoVenta");
-
-        
         try {
             $hora_servidor = date('Y-m-d H:i:s');
             $jackpots = Evento::JackPotEvento($idPuntoVenta);

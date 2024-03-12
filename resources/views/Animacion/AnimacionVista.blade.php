@@ -312,7 +312,6 @@
 <script src="{{asset('../assets/js/animacion_cuy/jquery-glowing.js')}}"></script>
 <script src="{{asset('../assets/js/animacion_cuy/jquery.color.js')}}"></script>
 <script src="{{asset('../assets/js/animacion_cuy/jquery.illuminate.0.7.min.js')}}"></script>
-
 <!-- <script src="{{asset('../assets/js/animacion_cuy/jquery.fittext.js')}}"></script> -->
 <script type="x-shader/x-vertex" id="vertexShader">
 			varying vec3 vWorldPosition;
@@ -340,10 +339,10 @@ calcular_estadisticas_nuevo();
 function calcular_estadisticas_nuevo(){
 	$(TipoApuestaListado).each(function(i,e){
 		valor=e.valorapuesta;
-		Repetidos=ganador_array(valor);
-		e.Repetidos=Repetidos
+		Repetidos = ganador_array(valor);
+		e.Repetidos = Repetidos
 	})
-	estadistica=TipoApuestaListado;
+	estadistica = TipoApuestaListado;
 	calcular_estadisticas(estadistica);
 }
 function ganador_array(valorganador){

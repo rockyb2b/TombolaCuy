@@ -1,91 +1,65 @@
-<DIV CLASS="CONTENEDOR_TOMBOLACUY" style="<?php  if(isset($style_contenedor)){ echo $style_contenedor;}?> ">
+<DIV CLASS="CONTENEDOR_TOMBOLACUY" style="padding-top:0px">
     <div class="row" style="display:none">
-    <div class="col-md-12">
-        <div class="panel panel-primary">
-            <div class="panel-body" id="datoscaja">
-                <div class="row">
-                    <div class="col-md-7 col-xs-12 col-sm-12">
-                        <h6>
-                            <i class="glyphicon glyphicon-th mr-2"></i>
-                            Venta Caja    
-                            <input type="hidden" id="IPSERVIDOR_WEBSOCKETS" value="{{env('IPSERVIDOR_WEBSOCKETS','35.184.46.33')}}">
-                            <input type="hidden" id="PUERTO_WEBSOCKETS" value="{{env('PUERTO_WEBSOCKETS','888')}}">
-                        </h6>
+        <div class="col-md-12">
+            <div class="panel panel-primary">
+                <div class="panel-body" id="datoscaja">
+                    <div class="row">
+                        <div class="col-md-7 col-xs-12 col-sm-12">
+                            <h6>
+                                <i class="glyphicon glyphicon-th mr-2"></i>
+                                Venta Caja    
+                            </h6>
+                        </div>
+                        <div class="col-md-5 col-xs-12 col-sm-12">
+                        </div>
                     </div>
-                    <div class="col-md-5 col-xs-12 col-sm-12">
-                        <!-- <div class="row"> -->
-                        <?php if($aperturacajadatos == null){?>
-                                <button class="btn btn-primary  pull-right" style="float: right;" id="apertura_de_caja" onClick="CargarAperturaCaja()">AP. DE CAJA</button> 
-                            <?php }
-                            else{ ?>
+                    <hr style="margin-top: 0px;">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon bg-primary text-white">TIENDA</div>
+                                    <input type="text" class="form-control input-sm" id="tienda"  value="1" readonly>
+                                    <input type="hidden" class="form-control input-sm" id="idPuntoVenta" value="1" >
+                                    <input type="hidden" class="form-control input-sm" id="idUbigeo" value="1" >
+                                    <input type="hidden" class="form-control input-sm" id="idAperturaCaja" value="1" >
+                                    <input type="hidden" class="form-control input-sm" id="cc_id" value="1" >
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon bg-primary text-white">CAJA</div>
+                                    <input type="text" class="form-control input-sm" id="caja" value="1" readonly>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-                                <button style="margin-right:2px" class="btn btn-primary pull-right" id="cierre_caja" onClick="CargarCierreCaja()">CIERRE CAJA</button> 
-                                <button style="margin-right:2px"class="btn btn-primary pull-right"  id="recargar_tabla" onClick="CargarTabla()">RECARGAR</button> 
-    
-                        <?php }?>
-                        <!-- </div> -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon bg-primary text-white">FECHA</div>
+                                    <input type="text" class="form-control input-sm" id="fechaOperacion"  value="{{ date('Y-m-d H:i:s') }}"  readonly>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <div class="input-group-addon bg-primary text-white">TURNO</div>
+                                    <input type="text" class="form-control input-sm" id="turno" value="1" readonly>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                 </div>
-                <?php if($eventosdatos != null){?>
-
-                <hr style="margin-top: 0px;">
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <div class="input-group">
-                                <div class="input-group-addon bg-primary text-white">TIENDA</div>
-                                <input type="text" class="form-control input-sm" id="tienda"  value="{{ $aperturacajadatos->tienda }}" readonly>
-                                <input type="hidden" class="form-control input-sm" id="idPuntoVenta" value="{{ $aperturacajadatos->idPuntoVenta }}" >
-                                <input type="hidden" class="form-control input-sm" id="idUbigeo" value="{{ $aperturacajadatos->idUbigeo }}" >
-                                <input type="hidden" class="form-control input-sm" id="idAperturaCaja" value="{{ $aperturacajadatos->idAperturaCaja }}" >
-                                <input type="hidden" class="form-control input-sm" id="cc_id" value="{{ $aperturacajadatos->cc_id }}" >
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <div class="input-group">
-                                <div class="input-group-addon bg-primary text-white">CAJA</div>
-                                <input type="text" class="form-control input-sm" id="caja" value="{{ $aperturacajadatos->caja }}" readonly>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <div class="input-group">
-                                <div class="input-group-addon bg-primary text-white">FECHA</div>
-                                <input type="text" class="form-control input-sm" id="fechaOperacion"  value="{{ $aperturacajadatos->fechaOperacion }}"  readonly>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <div class="input-group">
-                                <div class="input-group-addon bg-primary text-white">TURNO</div>
-                                <input type="text" class="form-control input-sm" id="turno" value="{{ $aperturacajadatos->turno }}" readonly>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-                <?php }else{  }?>
-
             </div>
         </div>
-    </div>
-
-</div><!--fin  CLASS row-->
-
-   <!--      <div class="row">
-            <div class="col-md-12">
-                <div class="panel panel-primary">
-                    <div class="panel-body"> -->
-
-
+    </div><!--fin  CLASS row-->
     <div class="TOMBOLACUY" style="display:none;/*height:89vh;/">
         <div class=" rowcabecera">
             <div class=" rowcabecera_nombres">
@@ -102,10 +76,9 @@
                         <div>DIVISA</div>  
                 </div>
                 <div style="width:33%;justify-content:end;padding-right:1.6%" class="">
-                    <div>JACKPOT</div>  
+                    <div>SALDO</div>  
                 </div>
             </div>
-
             <div class=" rowcabecera_datos" id="row_datosevento">
                 <div style="width:22%;display:block" class="" >
                     <div style="display:flex;width:100%">
@@ -119,10 +92,8 @@
                     </div>
                     <div style="display:flex;width:50%">
                         <div id="progreso" style="padding: 0;display:block;float:right;width: 80%;margin:auto;height:45%; background:rgba(0, 0, 0, 0) linear-gradient(to right,#2196f3, #8bc34a, #f44336) repeat scroll 0 0; border-radius:5px 0px 0px 5px">
-                            <div id="barra_loading" style="float:right;width:100%;height:100%;background-color: green;
-
-                            ">
-                                </div>
+                            <div id="barra_loading" style = "float:right;width:100%;height:100%;background-color: green;">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -139,7 +110,7 @@
                             display:flex;
                             align-item:center;
                             justify-content:end" 
-                        id="jackpotsuma">0.00
+                        id="saldosuma">0.00
                 </div>
             </div><!--fin rowcabecera_datos-->
         </div><!--FIN rowcabecera-->
@@ -261,7 +232,6 @@
                             <!-- <div class="col-xs-12 col-md-1"></div> -->
                     </div><!--contenedor_tablaprincipal-->
                 </div><!--FIN TABLA PLENO-->
-
                 <div class="tabla_apuestas_adicionales" >
                     <div class="apuestas_adicionales">
                         <div class=" apuestasadicionales_titulo" >
@@ -277,17 +247,13 @@
                                             data-idTipoApuesta="{{$div->idTipoApuesta}}" 
                                             data-idTipoPago="{{$div->idTipoPago}}" 
                                             style="background-color:{{$div->rgb}};color:{{$div->rgbLetra}}" 
-
                                             data-tipo="color" 
-
-                                            <?php 
-                                            $datacolor = $div->nombre;
-                                            ?>
+                                            <?php $datacolor = $div->nombre; ?>
                                             data-color="{{$datacolor}}"
                                             data-color2="{{$div->rgb}}"
                                             data-descripcion="{{$div->descripcion}}"
-                                            data-valor="{{$div->nombre}}"
-                                            data-cuota="{{$div->multiplicadorDefecto}}"
+                                            data-valor = {{$div->nombre}}" 
+                                            data-cuota = {{$div->multiplicadorDefecto}} 
                                             >{{$div->nombre}}</div>
                                         @endforeach
                                 </div>      
@@ -354,7 +320,6 @@
                 </div>
         <!--fin div rowhisto hisotrila numeros-->
 
-
             </div><!-- columna principal_izqueirda -->
             <div class="columna_principalderecha">
 
@@ -419,7 +384,7 @@
                     </div> 
                     <div class="rowbotonesdiv cerrar icon icon-2x fa fa-close">
                     </div>                                        
-                    <div class="rowbotonesdiv print icon icon-2x fa fa-print">
+                    <div class="rowbotonesdiv bet icon icon-2x fa fa-print">
                     </div> 
                 </div>
                 <!--rowapuestas-->
@@ -427,49 +392,41 @@
             </div><!--FIN class columna_principalderecha-->
         </div><!--fin row medio -->
         <div class="rowconfiguracioneventosdiv" id="div_configuracioneventos">
-
             <div class="eventos_fila_izq" style="padding-left: 6px;padding-right: 6px;">
                 <?php if ($eventosdatos != null){?>
-                    @foreach($eventosdatos as $evento) 
-                    <div class="configuracioneventosdiv" 
-                    data-id="{{ $evento->idEvento }}"
-                    data-idJuego="{{ $evento->idJuego }}"
-                    data-nombre="{{ $evento->nombre }}"
-                    data-apuestaMinima="{{ $evento->apuestaMinima }}"
-                    data-apuestaMaxima="{{ $evento->apuestaMaxima }}"
+                    <div class = "configuracioneventosdiv" 
+                        data-id = "{{ $eventosdatos->idEvento }}"
+                        data-idJuego = "{{ $eventosdatos->idJuego }}"
+                        data-nombre = "{{ $eventosdatos->nombre }}"
+                        data-apuestaMinima = "{{ $eventosdatos->apuestaMinima }}"
+                        data-apuestaMaxima = "{{ $eventosdatos->apuestaMaxima }}"
 
-                    data-apuestaMinimajuego="{{ $evento->apuestaMinimaJuego }}"
-                    data-apuestaMaximajuego="{{ $evento->apuestaMaximaJuego }}"
-                    
-                    data-FechaEvento="{{ $evento->FechaEvento }}"
-                    data-fechaFinEvento="{{ $evento->fechaFinEvento }}"
-                    data-segBloqueoAntesEvento="{{ $evento->segBloqueoAntesEvento }}"
-                    data-idMoneda="{{ $evento->idMoneda }}"
+                        data-apuestaMinimajuego = "{{ $eventosdatos->apuestaMinimaJuego }}"
+                        data-apuestaMaximajuego = "{{ $eventosdatos->apuestaMaximaJuego }}"
+                        
+                        data-FechaEvento = "{{ $eventosdatos->FechaEvento }}"
+                        data-fechaFinEvento = "{{ $eventosdatos->fechaFinEvento }}"
+                        data-segBloqueoAntesEvento = "{{ $eventosdatos->segBloqueoAntesEvento }}"
+                        data-idMoneda = "{{ $eventosdatos->idMoneda }}"
 
-                    data-jugador="{{$evento->jugador}}"
-                    data-divisa="{{$evento->divisa}}"
-                    data-jackpotsuma="{{$evento->jackpotsuma}}"
-                    data-logo="{{$evento->logo}}"
+                        data-jugador = "{{$eventosdatos->jugador}}"
+                        data-divisa = "{{$eventosdatos->divisa}}"
+                        data-logo = "{{$eventosdatos->logo}}"
                     > 
                         <div style="width: 30%; height: 100%;/*float:left;*/position:relative;margin:auto;">
-                            <img style="width:100%;height:80%;position: absolute; left: 50%; transform: translate(-50%, -50%); top: 50%;" src="img/juegos/{{$evento->logo}}">
+                            <img style="width:100%;height:80%;position: absolute; left: 50%; transform: translate(-50%, -50%); top: 50%;" src="img/juegos/{{$eventosdatos->logo}}">
                         </div>
                     </div>
-                    @endforeach
                 <?php }?>
             </div>
-                    <div class="eventos_fila_der">
-                    <!-- <div id="reimprimir" class="icon icon-2x fa fa-print" ></div> -->
-                    <!-- <div id="cancelar" class="icon icon-2x fa fa-close"></div> -->
-                    
-                    <div id="recargar_boton" >
-                        <div class="icon icon-2x fa fa-refresh divboton" data-toggle="tooltip" title="Recargar">
-                        </div>
+            <div class="eventos_fila_der">
+                <!-- <div id="reimprimir" class="icon icon-2x fa fa-print" ></div> -->
+                <!-- <div id="cancelar" class="icon icon-2x fa fa-close"></div> -->
+                <div id="recargar_boton" >
+                    <div class="icon icon-2x fa fa-refresh divboton" data-toggle="tooltip" title="Recargar">
                     </div>
-                            <div id="reimprimir_o_cancelar" >
-                        <div class="icon icon-2x fa fa-search divboton" data-toggle="tooltip" title="Imprimir o Cancelar Ticket">
-                    </div></div>
-                    </div>
+                </div>                
+            </div>
         </div><!--fin rowconfiguracioneventosdiv-->
     </div><!--JUEGO TOMBOLACUY-->
 </DIV>

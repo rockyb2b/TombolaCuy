@@ -95,16 +95,16 @@ if($buscar_idlocal!=""){
     public static function GuardarTicket(Request $request)
     {
         $Ticket = new Ticket();
-        $Ticket->idAperturaCaja = $request->input('idAperturaCaja');
         $Ticket->idEvento = $request->input('idEvento');
-        $Ticket->codigoQR = $request->input('codigoQR');
-        $Ticket->nroTicketParticipante = $request->input('nroTicketParticipante');
         $Ticket->ganador = $request->input('ganador');
         $Ticket->estadoTicket = $request->input('estadoTicket');
         $Ticket->montoTotal = $request->input('montoTotal');
         $Ticket->fechaRegistro = date('Y-m-d H:i:s');
         $Ticket->PremioMaximoPagar = $request->input('PremioMaximoPagar_guardar');
         $Ticket->PremioMaximoPotencial = $request->input('PremioMaximoPotencial_guardar');
+        $Ticket->sessionToken = $request->input('sessionToken');
+        $Ticket->playerID = $request->input('playerID');
+        $Ticket->gameID = $request->input('gameID');
         $Ticket->save();
         return $Ticket;
     }

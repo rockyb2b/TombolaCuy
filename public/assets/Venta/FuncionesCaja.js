@@ -780,13 +780,13 @@ function detenerContador(){
 }
 
 function detenerHistorialJackpot(){
-    DETENER_HISTORIALJACKPOT=true;
-        if(typeof llamada_ajax!=="undefined"){
-            llamada_ajax.abort();
-        }
-        if(typeof TIMEOUT_HistorialJackpotDatosJson!=="undefined"){
-             clearInterval(TIMEOUT_HistorialJackpotDatosJson);
-        }
+    DETENER_HISTORIALJACKPOT = true;
+    if(typeof llamada_ajax !== "undefined"){
+        llamada_ajax.abort();
+    }
+    if(typeof TIMEOUT_HistorialJackpotDatosJson !== "undefined"){
+        clearInterval(TIMEOUT_HistorialJackpotDatosJson);
+    }
     //  if(typeof intervaloihistorialjackpot!="undefined"){
     //         clearInterval(intervaloihistorialjackpot);
     //         delete intervaloihistorialjackpot;
@@ -1681,7 +1681,7 @@ function ImprimirJson2(ticketobjeto_imprimir,idTicket,response){
 }
 
 function HistorialJackpotDatosJson(puntoventa,idev){
-        llamada_ajax=$.ajax({
+        llamada_ajax = $.ajax({
                 type: 'POST',
                 url: basePath + 'HistorialJackpotDatosJsonFk',
                 data: {

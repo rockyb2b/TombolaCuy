@@ -28,6 +28,7 @@ class Juego extends Model
         'diasVigentesCobroTicket',
         'estado',
         'segBloqueoAntesAnimacion',
+        'idJuego'
     ];
 
     public static function JuegoListarLapsoJson()
@@ -35,6 +36,16 @@ class Juego extends Model
         $listar = DB::table('juego as j')
             ->where('estado', 1)
             ->get();
+        return $listar;
+    }
+    public static function GetJuegoJson()
+    {
+        $listar = DB::table('juego as j')
+            ->where('estado', 1)
+            ->where('idJuego', 1)
+            ->get()
+            ->first();
+            ;
         return $listar;
     }
 

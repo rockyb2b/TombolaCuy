@@ -7,7 +7,7 @@ use DB;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Log;
 class Evento extends Model
 {
     protected $table = 'evento';
@@ -27,52 +27,80 @@ class Evento extends Model
         'estadoAnimacion',
         'tokenAnimacion',
         'segCajaGirando',
-        'puntosCuy'
+        'puntosCuy',
+
+        'sessionToken',
+        'playerID',
+        'gameID'
     ];
 
     public $timestamps = false;
 
     public static function EventoListar()
     {
-        $listar = DB::select(DB::raw('
-select ev.idEvento,ev.idJuego,ev.nombre as nombre, ev.FechaEvento as FechaEvento, ev.fechaFinEvento  as fechaFinEvento,ju.logo as logo,ju.segBloqueoAntesEvento as segBloqueoAntesEvento,ev.idMoneda,
-ev.apuestaMinima as apuestaMinima, ev.apuestaMaxima as apuestaMaxima    
-from evento ev
-left join juego ju on ju.idJuego= ev.idJuego
-where ev.estadoEvento=1'));
+        $listar = DB::select(DB::raw('SELECT ev.idEvento,
+                                        ev.idJuego,
+                                        ev.nombre as nombre,
+                                        ev.FechaEvento as FechaEvento,
+                                        ev.fechaFinEvento  as fechaFinEvento,
+                                        ju.logo as logo,
+                                        ju.segBloqueoAntesEvento as segBloqueoAntesEvento,
+                                        ev.idMoneda,
+                                        ev.apuestaMinima as apuestaMinima,
+                                        ev.apuestaMaxima as apuestaMaxima    
+                                        FROM evento ev
+                                        LEFT JOIN juego ju on ju.idJuego= ev.idJuego
+                                        WHERE ev.estadoEvento = 1'));
         return $listar;
     }
 
-    public static function EventoDatosListar($idPuntoVenta)
+    public static function EventoActivo($idPuntoVenta ,  $playerID , $gameID)
     {
-        $listar = DB::select(DB::raw('
- select 
-(select  COUNT(*)  as cantidadganadores FROM ticket WHERE idEvento=ev.idEvento) as jugador,
-(select mon.simbolo as simbolo  FROM evento ev2 left join moneda mon on mon.idMoneda=ev2.idMoneda WHERE ev2.idEvento=ev.idEvento ) as divisa,
-(select   IFNULL(sum(POL.montoActual),0) as sumajackpots FROM pozo_online POL
-            INNER JOIN pozo_jackpot PZJ ON PZJ.idPozoJackpot=POL.idPozoJackpot
-            INNER JOIN jackpot JACK ON JACK.idJackpot=PZJ.idJackpot
-            INNER JOIN jackpot_punto_venta JPV ON JPV.idJackpot=JACK.idJackpot
-            WHERE JPV.idPuntoVenta= ' . $idPuntoVenta . ') as jackpotsuma,
-ev.idEvento,ev.idJuego,ev.nombre as nombre, ev.FechaEvento as FechaEvento, ev.fechaFinEvento  as fechaFinEvento,ju.logo as logo,ju.segBloqueoAntesEvento as segBloqueoAntesEvento,ev.idMoneda,
-ev.apuestaMinima as apuestaMinima, ev.apuestaMaxima as apuestaMaxima,
-ju.apuestaMinima as apuestaMinimaJuego, ju.apuestaMaxima as apuestaMaximaJuego       
-from evento ev
-left join juego ju on ju.idJuego= ev.idJuego
-where ev.estadoEvento=1 and ju.estado=1'));
-        return $listar;
+        $evento = DB::table('evento as ev')
+                    ->select(
+                        DB::raw('(select COUNT(*) as cantidadganadores FROM ticket WHERE idEvento = ev.idEvento) as jugador'),
+                        DB::raw('(select mon.simbolo as simbolo FROM evento ev2 left join moneda mon on mon.idMoneda = ev2.idMoneda WHERE ev2.idEvento = ev.idEvento) as divisa'),
+                        'ev.idEvento',
+                        'ev.idJuego',
+                        'ev.nombre',
+                        'ev.FechaEvento as FechaEvento',
+                        'ev.fechaFinEvento as fechaFinEvento',
+                        'ju.logo as logo',
+                        'ju.segBloqueoAntesEvento as segBloqueoAntesEvento',
+                        'ev.idMoneda',
+                        'ev.apuestaMinima as apuestaMinima',
+                        'ev.apuestaMaxima as apuestaMaxima',
+                        'ju.apuestaMinima as apuestaMinimaJuego',
+                        'ju.apuestaMaxima as apuestaMaximaJuego'
+                    )
+                    ->leftJoin('juego as ju', 'ju.idJuego', '=', 'ev.idJuego')
+                    ->where('ev.estadoEvento', 1)
+                    ->where('ju.estado', 1)
+                    ->where('ev.playerID', $playerID)
+                    ->where('ev.gameID', $gameID)
+                    ->first();
+        return $evento;
     }
 
 
     public static function EventoId($idEvento)
     {
 
-        $listar = DB::select(DB::raw('select ev.idEvento,ev.nombre as nombre, ev.FechaEvento as FechaEvento, ev.fechaFinEvento  as fechaFinEvento, ju.logo as logo,
-            ju.segBloqueoAntesEvento as segBloqueoAntesEvento,ev.idMoneda,
-ev.apuestaMinima as apuestaMinima, ev.apuestaMaxima as apuestaMaxima    
-from evento ev
-left join juego ju on ju.idJuego= ev.idJuego
-where ev.estadoEvento=1 and idEvento=' . $idEvento));
+        $listar = DB::select(DB::raw('SELECT ev.idEvento,
+                                        ev.nombre AS nombre,
+                                        ev.FechaEvento AS FechaEvento,
+                                        ev.fechaFinEvento  AS fechaFinEvento,
+                                        ju.logo AS logo,
+                                        ju.segBloqueoAntesEvento AS segBloqueoAntesEvento,
+                                        ev.idMoneda,
+                                        ev.apuestaMinima AS apuestaMinima,
+                                        ev.apuestaMaxima AS apuestaMaxima,
+                                        segBloqueoAntesAnimacion ,
+                                        segCajaGirando,
+                                        puntosCuy
+                                    FROM evento ev
+                                    LEFT JOIN juego ju ON ju.idJuego = ev.idJuego
+                                    WHERE ev.estadoEvento = 1 and idEvento =' . $idEvento));
         return $listar;
     }
 
@@ -101,13 +129,15 @@ where ev.estadoEvento=1 and idEvento=' . $idEvento));
 
     public static function JugadoresEvento($idEvento)
     {
-        $listar = DB::select(DB::raw("select  COUNT(idTicket)  as cantidadjugadores FROM ticket WHERE idEvento= ".$idEvento."  and estadoTicket in (1,2)"));
+        $listar = DB::select(DB::raw("SELECT COUNT(idTicket) AS cantidadjugadores 
+                                        FROM ticket
+                                        WHERE idEvento = ".$idEvento."  AND estadoTicket in (1,2)"));
         return $listar;
     }
 
     public static function JackPotEvento($idPuntoVenta)
     {
-        $listar = DB::select(DB::raw("select  POL.montoActual FROM pozo_online POL
+        $listar = DB::select(DB::raw("SELECT  POL.montoActual FROM pozo_online POL
 			INNER JOIN pozo_jackpot PZJ ON PZJ.idPozoJackpot=POL.idPozoJackpot
 			INNER JOIN jackpot JACK ON JACK.idJackpot=PZJ.idJackpot
 			INNER JOIN jackpot_punto_venta JPV ON JPV.idJackpot=JACK.idJackpot
@@ -118,7 +148,8 @@ where ev.estadoEvento=1 and idEvento=' . $idEvento));
 
     public static function JackPotSumaEvento($idPuntoVenta)
     {
-        $listar = DB::select(DB::raw("select   IFNULL(sum(POL.montoActual),0) as sumajackpots FROM pozo_online POL
+        $listar = DB::select(DB::raw("SELECT IFNULL(sum(POL.montoActual),0) as sumajackpots 
+            FROM pozo_online POL
 			INNER JOIN pozo_jackpot PZJ ON PZJ.idPozoJackpot=POL.idPozoJackpot
 			INNER JOIN jackpot JACK ON JACK.idJackpot=PZJ.idJackpot
 			INNER JOIN jackpot_punto_venta JPV ON JPV.idJackpot=JACK.idJackpot
@@ -127,20 +158,21 @@ where ev.estadoEvento=1 and idEvento=' . $idEvento));
         return $listar;
     }
 
-
     public static function HistorialEvento($ideventoactual)
     {
-        $listar = DB::select(DB::raw("select evt.idEvento, res.`valorGanador`,tipo_apuesta.rgb as color,tipo_apuesta.rgbLetra as rgbLetra
-         FROM  `resultado_evento` res
-inner join evento evt on res.`idEvento`=evt.`idEvento`
-left join tipo_apuesta on tipo_apuesta.idTipoApuesta=res.idTipoApuesta
-WHERE  
- evt.idJuego=(select even.idJuego from evento as even where even.idEvento=" . $ideventoactual . ")
-
-and (tipo_apuesta.idTipoPago in (1,6) ) 
-and evt.idEvento!=" . $ideventoactual . "  and evt.estadoEvento=2
-order by evt.`fechaEvento` DESC
-LIMIT 18
+        $listar = DB::select(DB::raw("SELECT evt.idEvento,
+                                        res.`valorGanador`,
+                                        ta.rgb AS color,
+                                        ta.rgbLetra AS rgbLetra
+                                        FROM resultado_evento res
+                                        INNER JOIN evento evt ON res.`idEvento` = evt.`idEvento`
+                                        LEFT JOIN tipo_apuesta ta ON ta.idTipoApuesta = res.idTipoApuesta
+                                        WHERE  
+                                        evt.idJuego = (SELECT even.idJuego FROM evento AS even WHERE even.idEvento=" . $ideventoactual . ")
+                                        AND (ta.idTipoPago in (1,6) )
+                                        AND evt.idEvento != " . $ideventoactual . "  and evt.estadoEvento = 2
+                                        ORDER BY evt.`fechaEvento` DESC
+                                        LIMIT 18
             "));
         return $listar;
     }
@@ -165,9 +197,35 @@ LIMIT 18
 
     public static function DineroDefaultListar()
     {
-        $listar = DB::select(DB::raw("select * from dinero_default where estado =1"));
+        $listar = DB::select(DB::raw("SELECT * from dinero_default where estado = 1"));
         return $listar;
     }
+
+    public static function RegistrarEventoCuyTorito($juego, $fechaIni, $fechaEventoFin, $posiciones ,$sessionToken = null ,$playerID = null,$gameID = null)
+    {
+        $token_generado = str_random(8);
+        $evento = new Evento();
+        $evento->idJuego = $juego->idJuego;
+        $evento->nombre = $juego->nombre;
+        $evento->fechaEvento = $fechaIni;
+        $evento->fechaFinEvento = $fechaEventoFin;
+        $evento->apuestaMinima = $juego->apuestaMinima;
+        $evento->apuestaMaxima = $juego->apuestaMaxima;
+        $evento->idMoneda = $juego->idMoneda;
+        $evento->estadoEvento = 1; //  1 ejecución  , 2 terminado
+        $evento->estadoAnimacion = 0;
+        $evento->tokenAnimacion = $token_generado;
+        $evento->puntosCuy = json_encode($posiciones);
+        
+        $evento->sessionToken = $sessionToken;
+        $evento->playerID = $playerID;
+        $evento->gameID = $gameID;
+        $evento->created_at = date("Y-m-d H:i:s");
+        $evento->updated_at = date("Y-m-d H:i:s");
+        $evento->save();
+        return $evento;
+    }
+
 
     public static function RegistrarEvento($juego, $fechaIni, $fechaEventoFin, $posiciones)
     {
@@ -184,9 +242,11 @@ LIMIT 18
         $evento->estadoAnimacion = 0;
         $evento->tokenAnimacion = $token_generado;
         $evento->puntosCuy = json_encode($posiciones);
+
         $evento->save();
         return $evento;
     }
+    
 
     public static function EventoActual($IdJuego)
     {
@@ -367,7 +427,7 @@ LIMIT 18
             $startTimef = microtime(true);
             echo ":";
             $Evento_para_activar =
-                DB::select(DB::raw("select idEvento,fechaFinEvento from evento 
+                DB::select(DB::raw("SELECT idEvento,fechaFinEvento from evento 
                                             where idJuego=" . $idJuego . "
                                             and estadoEvento=0
                                             and fechaEvento <='$hora' 
@@ -381,7 +441,7 @@ LIMIT 18
             if (count($Evento_para_activar) > 0) {
                 $idEvento = $Evento_para_activar[0]->idEvento;
                 $fechaFinEvento = $Evento_para_activar[0]->fechaFinEvento;
-                $ActivarEvento = DB::SELECT(DB::raw("update evento set estadoEvento=1 where idEvento=" . $idEvento));
+                $ActivarEvento = DB::SELECT(DB::raw("UPDATE evento set estadoEvento=1 where idEvento=" . $idEvento));
                 Evento::CerrarEventoMysql($idJuego, $idEvento, $fechaFinEvento);
                 echo "$hora ACTIVANDO Ev " . $idEvento . " -Juego " . $idJuego . " - Fin:" . $fechaFinEvento . " ...\n";
             }
@@ -436,7 +496,20 @@ LIMIT 18
         //echo "Tiempo foreachlista : ". (microtime(true) - $startTimef) ." segundos\n";
     }
 
-
+    public static function UpdateEvento($id){
+        $evento = Evento::find($id); //
+        if ($evento) {
+            $tiempo_vista_venta = env('TIEMPO_VISTA_VENTA');
+            $fecha_inicio = date("Y-m-d H:i:s");
+            $fecha_fin = date("Y-m-d H:i:s", strtotime($fecha_inicio . " + $tiempo_vista_venta seconds"));
+            $evento->fechaEvento = $fecha_inicio;
+            $evento->fechaFinEvento = $fecha_fin;
+            $evento->save();
+            return true;
+        } else {
+            return false;
+        }
+    }
     public static function ActivarEventos2()
     {
         echo '.';
@@ -581,7 +654,6 @@ LIMIT 18
                 'mostrar_cuydudando' => $mostrar_cuydudando
             ];
             array_push($array_puntos, $obj);
-
         }
         return $array_puntos;
     }

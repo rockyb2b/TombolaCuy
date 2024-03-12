@@ -51,7 +51,8 @@ class JobCommand3 extends Command
             if(count($totalValorGanador) == 0){
                 $lista [] = [
                     'idEvento' => $e->idEvento,
-                    'random' => $numero_random];
+                    'random' => $numero_random
+                ];
             }
         }
         if(count($lista) != 0){
