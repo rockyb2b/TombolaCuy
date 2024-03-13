@@ -8,6 +8,7 @@
 	<link rel="stylesheet" href="{{asset('../components/toastr/toastr.min.css')}}">
 	<link rel="stylesheet" href="{{asset('../css/Animacion/estilos_animacion_cuy.css')}}">
 	<link rel="stylesheet" href="{{asset('../css/Animacion/ganadorEstilo.css')}}">
+    
 	<script src="{{asset('../assets/js/jquery3_3_1.min.js')}}"></script>
 	<script src="{{asset('../components/toastr/toastr.min.js')}}"></script>
 	<script src="{{asset('../components/loadingoverlay/loadingoverlay.min.js')}}"></script>
@@ -285,65 +286,65 @@
         </div>	
     </div>
 
-<script src="{{asset('../assets/js/clientevista/Funciones_Easing.js')}}"></script>
-<script src="{{asset('../assets/js/clientevista/animacion.js')}}"></script>
-<script src="{{asset('../assets/js/clientevista/animacion_cuy.js')}}"></script>
-<script src="{{asset('../assets/js/clientevista/animacion_cuy_teclas.js')}}"></script>
-<script src="{{asset('../assets/js/clientevista/tween.min.js')}}"></script>
-<script src="{{asset('../assets/js/clientevista/TweenMax.min.js')}}"></script>
+    <script src="{{asset('../assets/js/clientevista/Funciones_Easing.js')}}"></script>
+    <script src="{{asset('../assets/js/clientevista/animacion.js')}}"></script>
+    <script src="{{asset('../assets/js/clientevista/animacion_cuy.js')}}"></script>
+    <script src="{{asset('../assets/js/clientevista/animacion_cuy_teclas.js')}}"></script>
+    <script src="{{asset('../assets/js/clientevista/tween.min.js')}}"></script>
+    <script src="{{asset('../assets/js/clientevista/TweenMax.min.js')}}"></script>
 
-<script src="{{asset('../assets/js/clientevista/jquery.fireworks.js')}}"></script>
-<script src="{{asset('../assets/js/clientevista/jquery.fuegos_artificiales.js')}}"></script>
-<script src="{{asset('../assets/js/clientevista/jquery.confeti.js')}}"></script>
-<script src="{{asset('../assets/js/clientevista/jquery.burn.min.js')}}"></script>
-<script src="{{asset('../assets/js/clientevista/jquery.shiningImage.min.js')}}"></script>
+    <script src="{{asset('../assets/js/clientevista/jquery.fireworks.js')}}"></script>
+    <script src="{{asset('../assets/js/clientevista/jquery.fuegos_artificiales.js')}}"></script>
+    <script src="{{asset('../assets/js/clientevista/jquery.confeti.js')}}"></script>
+    <script src="{{asset('../assets/js/clientevista/jquery.burn.min.js')}}"></script>
+    <script src="{{asset('../assets/js/clientevista/jquery.shiningImage.min.js')}}"></script>
 
-<script src="{{asset('../assets/js/clientevista/jquery-glowing.js')}}"></script>
-<script src="{{asset('../assets/js/clientevista/jquery.color.js')}}"></script>
-<script src="{{asset('../assets/js/clientevista/jquery.illuminate.0.7.min.js')}}"></script>
-<!-- <script src="{{asset('../assets/js/clientevista/jquery.fittext.js')}}"></script> -->
-<script type="x-shader/x-vertex" id="vertexShader">
-        varying vec3 vWorldPosition;
-        void main() {
-            vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
-            vWorldPosition = worldPosition.xyz;
-            gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+    <script src="{{asset('../assets/js/clientevista/jquery-glowing.js')}}"></script>
+    <script src="{{asset('../assets/js/clientevista/jquery.color.js')}}"></script>
+    <script src="{{asset('../assets/js/clientevista/jquery.illuminate.0.7.min.js')}}"></script>
+    <!-- <script src="{{asset('../assets/js/clientevista/jquery.fittext.js')}}"></script> -->
+    <script type="x-shader/x-vertex" id="vertexShader">
+            varying vec3 vWorldPosition;
+            void main() {
+                vec4 worldPosition = modelMatrix * vec4( position, 1.0 );
+                vWorldPosition = worldPosition.xyz;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+            }
+    </script>
+    <script type="x-shader/x-fragment" id="fragmentShader">
+            uniform vec3 topColor;
+            uniform vec3 bottomColor;
+            uniform float offset;
+            uniform float exponent;
+            varying vec3 vWorldPosition;
+            void main() {
+                float h = normalize( vWorldPosition + offset ).y;
+                gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( max( h , 0.0), exponent ), 0.0 ) ), 1.0 );
+            }
+    </script>
+    <script>    
+        ultimos120eventos = {!! json_encode($ultimos120eventos) !!};
+        TipoApuestaListado = {!! json_encode($TipoApuestaListado) !!};
+        calcular_estadisticas_nuevo();
+        function calcular_estadisticas_nuevo(){
+            $(TipoApuestaListado).each(function(i,e){
+                var valor = e.valorapuesta;
+                var Repetidos = ganador_array(valor);
+                e.Repetidos = Repetidos
+            })
+            var estadistica = TipoApuestaListado;
+            calcular_estadisticas(estadistica);
         }
-</script>
-<script type="x-shader/x-fragment" id="fragmentShader">
-        uniform vec3 topColor;
-        uniform vec3 bottomColor;
-        uniform float offset;
-        uniform float exponent;
-        varying vec3 vWorldPosition;
-        void main() {
-            float h = normalize( vWorldPosition + offset ).y;
-            gl_FragColor = vec4( mix( bottomColor, topColor, max( pow( max( h , 0.0), exponent ), 0.0 ) ), 1.0 );
+        function ganador_array(valorganador){
+            var Repetidos = 0;
+            $(ultimos120eventos).each(function(i,e){
+                var ganador = e.ganador
+                if(valorganador == ganador){
+                    Repetidos++;
+                }
+            })
+            return Repetidos;
         }
-</script>
-<script>    
-ultimos120eventos = {!! json_encode($ultimos120eventos) !!};
-TipoApuestaListado = {!! json_encode($TipoApuestaListado) !!};
-calcular_estadisticas_nuevo();
-function calcular_estadisticas_nuevo(){
-	$(TipoApuestaListado).each(function(i,e){
-		var valor = e.valorapuesta;
-		var Repetidos = ganador_array(valor);
-		e.Repetidos = Repetidos
-	})
-	var estadistica = TipoApuestaListado;
-	calcular_estadisticas(estadistica);
-}
-function ganador_array(valorganador){
-	var Repetidos = 0;
-	$(ultimos120eventos).each(function(i,e){
-		var ganador = e.ganador
-		if(valorganador == ganador){
-			Repetidos++;
-		}
-	})
-	return Repetidos;
-}
-</script>
+    </script>
 </body>
 </html>

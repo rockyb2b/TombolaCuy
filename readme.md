@@ -72,20 +72,7 @@ php artisan db:seed
 
 
 ---------------------------------------------------------------------------------------------
-git clone 
-copy .env
 
-create database bd_s3k_tombolacuy_inicial
-
-bd_s3k_tombolacuy_inicial.sql
-
-ALTER TABLE `users` ADD `session_id` VARCHAR(255) NOT NULL AFTER `fecha_registro`;
-ALTER TABLE `ticket` ADD `PremioMaximoPagar` DECIMAL NOT NULL AFTER `fechaRegistro`;
-ALTER TABLE `ticket` ADD `PremioMaximoPotencial` DECIMAL NOT NULL AFTER `PremioMaximoPagar`;
-ALTER TABLE `apuesta` ADD `multiplicadorDefecto` DECIMAL NOT NULL AFTER `ZonaComercial`;
-
-composer install     composer update
-php artisan key:generate
 
 httpd.conf
 Listen 8000
@@ -102,14 +89,13 @@ Listen 8000
 habilitar extension  sockets  en PHP.INI
 
 htttpd.ssl  port 443
-<!-- php artisan command:name2   GENERA EVENTOS
-php artisan command:name3   genera ganadores
-php artisan command:name1   activar eventos -->
-jobs.bat   --> GENERAR EVENTOS , GANADORES , ACTIVA EVENTOS.
-php .\app\Http\Controllers\Api\servidor_websocket\iniciar_servidor.php  --> INICIAR SERVIDOR WEBSOCKETS
 
 
+- git clone 
+- create bd_toritocuy
+- bd_toritocuy.sql
 
-cmds :
-    jobs.bat
-    php .\app\Http\Controllers\Api\servidor_websocket\iniciar_servidor.php
+- copy .env
+- composer install 
+- php artisan key:generate
+

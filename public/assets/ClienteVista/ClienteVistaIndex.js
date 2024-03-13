@@ -1,56 +1,42 @@
-$(document).ready(function () {   
+OPCIONES_VENTA_VISTA = {
+    sessionToken            :   getUrlParameter('sessionToken'),
+    playerID                :   getUrlParameter('playerID'),
+    gameID                  :   getUrlParameter('gameID'),
+    TIEMPO_VISTA_VENTA      :   30,   //30 SEC.    DURACIÓN VISTA VENTA
+    SEG_BLOQUEO_ANTES_EVENTO:   2,//10,   //           PANTALLA SE BLOQUEA CUANDO FALTA __ SEGS
+    TIEMPO_INTERVALO_HISTORIALJACKPOT : 3000,    //CADA CUANTO SE ACTUALIZA HISTORIAL Y JACKPOT
+    USUARIO                 :    1,
+    TIENDA                  :   $("#datoscaja #tienda").val(),
+    CAJA                    :   $("#datoscaja #caja").val(),
+    FECHAOPERACION          :   $("#datoscaja #fechaOperacion").val(),
+    TURNO                   :   $("#datoscaja #turno").val(),
+    idPuntoVenta            :   $("#datoscaja #turno").val(),
+    idUbigeo                :   $("#datoscaja #idUbigeo").val(),
+    IDAPERTURACAJA          :   $("#datoscaja #idAperturaCaja").val(),
+    CC_iD                   :   $("#datoscaja #idAperturaCaja").val(),
+    imagen_loadingoverlay_contador      :basePath + "img/loading/load.gif",
+    ubicacion_imagenes_juego            :basePath + "img/juegos/",
 
-    $("body").css("overflow","hidden");
-    // INICIAR();
-    EventoActual();
-});
+    sonidos: {
+        numeros             : "/sound/numeros_click.wav",
+        apuestas_adicionales: "/sound/numeros_click.wav",
+        apuesta_check       : "/sound/numeros_click.wav",
+        apuesta_cancel       : "/sound/numeros_click.wav",
+        buscar_ticket       : "/sound/numeros_click.wav",
+        imprimir_ticket     : "/sound/numeros_click.wav"
+    },
+    RECARGAR_TOMBOLA : true,////despues de acabado el conteo .  detener al mostrar modal
 
-function INICIAR(evento = null)
-{
-    $(".TOMBOLACUY").show();
-    /////////onClick de Juegos/Eventos
-    // var divs_juego = $("#div_configuracioneventos .configuracioneventosdiv");
-    // divs_juego.off("click").on("click",function(){
-    //     $(".TOMBOLACUY").css("cursor","wait");
-    //     divs_juego.removeClass("seleccionadoevento");
-    //     $(this).addClass("seleccionadoevento");    
-        
-    //     detenerHistorialJackpot();
-    //     //DETENER_HISTORIALJACKPOT = false;
-    //     EventoDatosJsonNuevo(this);/// pide hora        
-    // })
-    //// FIN  Onclick eventos
-    setTimeout(function(){
-        $("#div_configuracioneventos .eventos_fila_izq>div").eq(0).click();
-    },5)
+    TIMEOUT_HistorialJackpotDatosJson : null, //settimeout para consultar historial
+    DETENER_HISTORIALJACKPOT : false,
+    ajax_historial : null ,   //variable que contiene ajax para detener historialjackpot
 
-    eventos_botones(evento); ////botones 1-22, rangos, colores ,  botones apuestas(1,2,4,5,10,20,50,100)  , botones check, x, buscar,imprimir
-    eventos_botones_modalbuscar(evento); ///botones del modal buscar=>  1-9 , buscar
-    responsivetombola();
-    $(window).resize(function () {
-        responsivetombola();
-        var heighttbody = $(".rowtablaeventos").height()-$("#tabla_eventos thead").height();
-        $("#tabla_eventos tbody").height(heighttbody);
-    }).trigger('resize');
-
-
-    
-    // eventoactual = {};
-    // eventoactual.FechaEvento    = $(divelemento).attr("data-FechaEvento");
-    // eventoactual.fechaFinEvento = $(divelemento).attr("data-fechaFinEvento");
-    // eventoactual.nombre         = $(divelemento).attr("data-nombre");
-    // eventoactual.IdEvento       = $(divelemento).attr("data-id");
-    // eventoactual.apuestaMinima  = $(divelemento).attr("data-apuestaMinima");
-    // eventoactual.apuestaMaxima  = $(divelemento).attr("data-apuestaMaxima");
-
-    // eventoactual.apuestaMinimaJuego = $(divelemento).attr("data-apuestaMinimaJuego");
-    // eventoactual.apuestaMaximaJuego = $(divelemento).attr("data-apuestaMaximaJuego");
-
-    // eventoactual.segBloqueoAntesEvento = OPCIONES_VENTA_VISTA.SEGBLOQUEOANTESEVENTO;
-    // eventoactual.idMoneda = $(divelemento).attr("data-idMoneda");
-    // eventoactual.Imagen = "img/juegos/"+$(divelemento).attr("data-logo");
-    // eventoactual.divisa = $(divelemento).attr("data-divisa");
-
-    EventoDatosJsonNuevo(evento);/// pide hora        
-
+    intervalo_horaservidor : null , //variable setinterval para actualizar reloj
+    intervalo_contador : null //variable setinterval para contador para terminar evento
 }
+
+
+$(document).ready(function () {   
+    $("body").css("overflow","hidden");    
+    EventoActual();//en ClienteVistaFunciones.js
+});

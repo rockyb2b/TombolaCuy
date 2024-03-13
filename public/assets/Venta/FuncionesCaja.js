@@ -71,7 +71,9 @@ function CargarTabla() { //results  Venta.CajaTabla view with variables values
        error: function (jqXHR, textStatus, errorThrown) {
                 toastr.error("Error de Conexión a Servidor");
                 $.LoadingOverlay("hide");
-                setTimeout(function(){CargarTabla()},5000)
+                setTimeout(function(){
+                    CargarTabla()
+                },5000)
         
         }
     })
@@ -1227,8 +1229,7 @@ function eventos_botones(){
 ///////////////////////////FIN BOTONESSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
 
 //////MODALES
-    $(".modal").off("hidden.bs.modal").on("hidden.bs.modal", function () {
-        // CargarTabla();
+    $(".modal").off("hidden.bs.modal").on("hidden.bs.modal", function () {        
         RECARGAR_TOMBOLA=true;
         if(typeof eventoactual!="undefined"){
         HistorialJackpotDatosJson(OPCIONES_CAJA.idPuntoVenta,eventoactual.IdEvento);
@@ -1237,8 +1238,7 @@ function eventos_botones(){
         }
     })
 
-        $(".modal").off("shown.bs.modal").on("shown.bs.modal", function () {
-        // CargarTabla();
+        $(".modal").off("shown.bs.modal").on("shown.bs.modal", function () {    
         $(".modal:visible input").focus();
         detenerHistorialJackpot();
         RECARGAR_TOMBOLA=false;

@@ -1,7 +1,4 @@
-
-
 $.fn.serializeFormJSON = function () {
-
     var o = {};
     var a = this.serializeArray();
     $.each(a, function () {

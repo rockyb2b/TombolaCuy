@@ -8,7 +8,7 @@ var archivos = ['images/glb/cuycaminando.glb', 'images/glb/cajagirando1.glb', 'i
 // ,'images/glb/cuysalto.glb'
 // ,'images/glb/tablero.glb'
 ];
-dt =0.03 // velocidad movimiento cuy
+dt = 0.03 // velocidad movimiento cuy
 dtrotacion = 0.05; // velocidad rotacion cuy;
 escalacuys = 0.25;
 escalacajagirando = 1;

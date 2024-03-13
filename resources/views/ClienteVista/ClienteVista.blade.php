@@ -1,14 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Page title -->
     <title>CuyTorito</title>
-    <!-- /Page title -->
-    <!-- Meta -->
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="_token" content="{!! csrf_token() !!}"/>
     <!-- SEO Meta -->
     <meta name="keywords" content="">
     <meta name="description" content="">
@@ -35,19 +31,18 @@
     <!-- Styles -->
     <link rel="stylesheet" href="{{asset('../css/theme.css')}}">
     <link rel="stylesheet" href="{{asset('../components/toastr/toastr.min.css')}}">
-    <link rel="stylesheet" href="{{asset('../components/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css')}}">
-    <link rel="stylesheet" href="{{asset('../components/select2/select2.min.css')}}" rel="stylesheet"/>
-    <link rel="stylesheet" href="{{asset('../css/demo.css')}}">
-    <link rel="stylesheet" href="{{asset('../components/icheck/skins/all.css')}}">
+    <!-- <link rel="stylesheet" href="{{asset('../components/bootstrap-datetimepicker/css/bootstrap-datetimepicker.min.css')}}"> -->
+    <!-- <link rel="stylesheet" href="{{asset('../components/select2/select2.min.css')}}" rel="stylesheet"/> -->
+    <!-- <link rel="stylesheet" href="{{asset('../css/demo.css')}}"> -->
+    <!-- <link rel="stylesheet" href="{{asset('../components/icheck/skins/all.css')}}"> -->
     <link rel="stylesheet" href="{{asset('../css/jquery.confirm.css')}}">
     <!-- /Styles -->
 </head>
 <body class="@yield('body-class','sidebar-style loaded expanded')">
-{{--<body class="sidebar-style loaded">--}}
+<!-- {{--<body class="sidebar-style loaded">--}} -->
     <!-- MAIN CONTAINER -->
     <main class="main-container">
-        <div class="content container-fluid">
-            <?php $style_contenedor = "padding-top:0px";?>
+        <div class="content container-fluid">            
             @include('ClienteVista.ClienteVistaCajaTabla')
         </div>
     </main>
@@ -60,7 +55,6 @@
     <script src="{{asset('../js/jquery.stellar.min.js')}}"></script>
     <script src="{{asset('../js/jquery.magnific-popup.min.js')}}"></script>
     <script src="{{asset('../js/pnotify.custom.min.js')}}"></script>
-    <script src="{{asset('../js/owl.carousel.min.js')}}"></script>
     <script src="{{asset('../js/jquery.animateNumber.min.js')}}"></script>
     <script src="{{asset('../js/sweetalert.min.js')}}"></script>
     <script src="{{asset('../js/circle-progress.min.js')}}"></script>
@@ -76,8 +70,8 @@
 
     <script src="{{asset('../assets/ClienteVista/ClienteVistaFunciones.js')}}"></script>
     <script src="{{asset('../assets/ClienteVista/ClienteVistaIndex.js')}}"></script>
-    <?php if($error!=""){?>
-        <script>toastr.error("<?php echo $error;?>");document.location = basePath + "AperturaCajaInsertar"</script>
+    <?php if($error != ""){?>
+        <script>toastr.error("<?php echo $error;?>");</script>
     <?php }?>
 </body>
 </html>

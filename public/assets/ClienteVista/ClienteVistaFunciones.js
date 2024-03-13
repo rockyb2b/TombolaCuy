@@ -1,40 +1,3 @@
-OPCIONES_VENTA_VISTA = {
-    sessionToken            :   getUrlParameter('sessionToken'),
-    playerID                :   getUrlParameter('playerID'),
-    gameID                  :   getUrlParameter('gameID'),
-    TIEMPO_VISTA_VENTA      :   30,   //30 SEC.    DURACIÓN VISTA VENTA
-    SEG_BLOQUEO_ANTES_EVENTO:   2,//10,   //           PANTALLA SE BLOQUEA CUANDO FALTA __ SEGS
-    TIEMPO_INTERVALO_HISTORIALJACKPOT : 3000,    //CADA CUANTO SE ACTUALIZA HISTORIAL Y JACKPOT
-    USUARIO                 :    1,
-    TIENDA                  :   $("#datoscaja #tienda").val(),
-    CAJA                    :   $("#datoscaja #caja").val(),
-    FECHAOPERACION          :   $("#datoscaja #fechaOperacion").val(),
-    TURNO                   :   $("#datoscaja #turno").val(),
-    idPuntoVenta            :   $("#datoscaja #turno").val(),
-    idUbigeo                :   $("#datoscaja #idUbigeo").val(),
-    IDAPERTURACAJA          :   $("#datoscaja #idAperturaCaja").val(),
-    CC_iD                   :   $("#datoscaja #idAperturaCaja").val(),
-    imagen_loadingoverlay_contador      :basePath + "img/loading/load.gif",
-    ubicacion_imagenes_juego            :basePath + "img/juegos/",
-
-    sonidos: {
-        numeros             : "/sound/numeros_click.wav",
-        apuestas_adicionales: "/sound/numeros_click.wav",
-        apuesta_check       : "/sound/numeros_click.wav",
-        apuesta_cancel       : "/sound/numeros_click.wav",
-        buscar_ticket       : "/sound/numeros_click.wav",
-        imprimir_ticket     : "/sound/numeros_click.wav"
-    },
-    RECARGAR_TOMBOLA : true,////despues de acabado el conteo .  detener al mostrar modal
-
-    TIMEOUT_HistorialJackpotDatosJson : null, //settimeout para consultar historial
-    DETENER_HISTORIALJACKPOT : false,
-    ajax_historial : null ,   //variable que contiene ajax para detener historialjackpot
-
-    intervalo_horaservidor : null , //variable setinterval para actualizar reloj
-    intervalo_contador : null //variable setinterval para contador para terminar evento
-
-}
 function getUrlParameter(name) {
     name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
     var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
@@ -61,7 +24,7 @@ function CargarClienteVistaTabla() { //results  Venta.CajaTabla view with variab
             {
                 toastr.error(response.error);
             }
-            INICIAR();
+            INICIAR(response.eventoactual);
             $.LoadingOverlay("hide");
         },
        error: function (jqXHR, textStatus, errorThrown) {
@@ -75,8 +38,7 @@ function CargarClienteVistaTabla() { //results  Venta.CajaTabla view with variab
         }
     })
 }
-
-function EventoActual() { //results  Venta.CajaTabla view with variables values
+function EventoActual() { //results consulta  datos evento actual e inicia contador para animacion cuy
     $.ajax({
         type: 'POST',
         url: basePath + 'EventoActual',
@@ -110,24 +72,112 @@ function EventoActual() { //results  Venta.CajaTabla view with variables values
     })
 }
 
-function GuardarGanadorEvento(apuestas_ganadoras,idTicket){/////GuardarGanadorEvento EN tabla Ganador_Evento
- $.ajax({
-        type: 'POST',
-        async:false,
-        url: basePath + 'GuardarGanadorEventoFk',
-         data: {
-            '_token': $('input[name=_token]').val(),
-            'apuestas':apuestas_ganadoras,
-            'idTicket':idTicket,
-            'idAperturaCaja': OPCIONES_VENTA_VISTA.IDAPERTURACAJA
-        },
-        success: function (response) {
-            if(response.respuesta){
-                toastr.success("Ticket Pagado");
-            }
-        },
-    })
+function INICIAR(evento = null)
+{
+    $(".TOMBOLACUY").show();
+    eventos_botones(evento); ////botones 1-22, rangos, colores ,  botones apuestas(1,2,4,5,10,20,50,100)  , botones check, x, buscar,imprimir
+    responsivetombola();
+    $(window).resize(function () {
+        responsivetombola();
+        var heighttbody = $(".rowtablaeventos").height()-$("#tabla_eventos thead").height();
+        $("#tabla_eventos tbody").height(heighttbody);
+    }).trigger('resize');
+
+    EventoDatosJsonNuevo(evento);/// pide hora        
 }
+function EventoDatosJsonNuevo(evento) {    
+    LimpiarApuestas();
+    procesar_hora(evento);//CLOCK
+    datos_configuracion_vista(evento);
+    OPCIONES_VENTA_VISTA.DETENER_HISTORIALJACKPOT = false;
+    OPCIONES_VENTA_VISTA.ajax_historial = HistorialJackpotDatosJson(evento.idEvento);    
+    setTimeout(function(){
+        $(".TOMBOLACUY").css("cursor","").show();
+    },500);    
+}///FIN EventoDatosJson
+function procesar_hora(eventoactual){ //generar HORA VistaCliente
+    var time_now = get_hora();
+    var time_event_seconds = addSecondsToCurrentDate(OPCIONES_VENTA_VISTA.TIEMPO_VISTA_VENTA);
+
+    var proxima_fecha = moment(time_event_seconds, "YYYY-MM-DD HH:mm:ss a");
+    var ahora = moment( time_now );
+    var segundos = proxima_fecha.diff(ahora,'seconds');
+    reloj_generar( time_now );
+
+    if(segundos < 1){
+        console.warn("Evento " + eventoactual.IdEvento + " con fecha fin= " + proxima_fecha.format("YYYY-MM-DD HH:mm:ss")+" menor a hora actual=" + ahora.format("YYYY-MM-DD HH:mm:ss")+", RECARGANDO....");
+        toastr.error("Evento #" + eventoactual.IdEvento + " ya finalizó, Recargar")
+        detenerContador();
+        $("#proximo_en2").text("--");
+        $("#barra_loading").css("width","100%");
+        $.LoadingOverlay("hide");
+        $("#contador_overlay").remove();
+        $("#recargar_tabla").text("Recargar").show();
+    } else {
+        $("#recargar_tabla").hide().text("");
+        ContadorProximoEvento( time_now ,time_event_seconds, OPCIONES_VENTA_VISTA.SEG_BLOQUEO_ANTES_EVENTO );
+    }
+}
+
+function ContadorProximoEvento(horaserv,fechaFinEvento,segundosantesbloqueo){
+    var proxima_fecha = moment(fechaFinEvento, "YYYY-MM-DD HH:mm:ss a");
+    var ahora = moment(horaserv);
+    var segundos = proxima_fecha.diff(ahora,'seconds');
+    $("#proximo_en2").text("--");
+    if(segundos > 0){
+        iniciarContador(segundos, $("#proximo_en2"),segundosantesbloqueo) ;
+    }
+    else{
+        if(typeof OPCIONES_VENTA_VISTA.intervalo_contador != "undefined"){
+            clearInterval(OPCIONES_VENTA_VISTA.intervalo_contador) 
+        }
+    }
+    console.log(horaserv);
+}
+function iniciarContador(duration, display ,segundosantesbloqueo) { ///ACTUALIZAR  "PRÓXIMO EN" ,  barra loading evento 
+    var timer = duration, minutos, segundos;
+    detenerContador();
+    OPCIONES_VENTA_VISTA.intervalo_contador = setInterval(function () {
+        var minutos = parseInt(timer / 60, 10);
+        var segundos = parseInt(timer % 60, 10);    
+        minutos = minutos < 10 ? "0" + minutos : minutos;
+        segundos = segundos < 10 ? "0" + segundos : segundos;
+        display.text(minutos + ":" + segundos);
+        // ///////segundos bloqueo        
+        if(OPCIONES_VENTA_VISTA.RECARGAR_TOMBOLA){
+            if(minutos == 0 && segundos <= segundosantesbloqueo){
+                detenerHistorialJackpot();
+                if($("#contador_overlay").length == 0){
+                    crear_loadingoverlay_contador();
+                }
+                if($("#contador_overlay").length > 0){
+                    $("#contador_overlay").text(segundos)
+                }
+            }
+            else{
+                var segundostotales = parseInt((parseInt(minutos)*60)) + parseInt(segundos);
+                if(segundostotales == segundosantesbloqueo){
+                    $.LoadingOverlay("show",{ image : OPCIONES_VENTA_VISTA.imagen_loadingoverlay_contador})
+                }
+            }
+            if(minutos == 0 && segundos == 0){ ///CONTADOR TERMINA 
+                detenerContador();
+                setTimeout(function(){
+                    ocultar_loadingoverlay_contador();
+                    EventoActual();/////INICIAR ANIMACION CUY ACA
+                },2000);
+            }
+        }
+        //fin segundos bloqueo
+        if (--timer < 0) {
+            timer = 0;// duration;
+        }
+    }, 1000);
+    setTimeout(function(){
+        activarBarraLoading(duration - segundosantesbloqueo);
+    },1000);
+}
+
 function GuardarTicket(eventoactual,ticketobjeto_imprimir){/////GUARDATICKET EN TICKET Y APUESTAS , ABRE MODAL
     var TicketObjeto = {};
     TicketObjeto.idEvento = eventoactual.idEvento;
@@ -172,7 +222,7 @@ function GuardarTicket(eventoactual,ticketobjeto_imprimir){/////GUARDATICKET EN 
     $.ajax({
         type: 'POST',
         url: basePath + 'GuardarApuestaCliente', 
-         data: {
+        data: {
                 sessionToken :  OPCIONES_VENTA_VISTA.sessionToken,
                 playerID :      OPCIONES_VENTA_VISTA.playerID,
                 gameID :        OPCIONES_VENTA_VISTA.gameID,
@@ -218,18 +268,6 @@ function datos_configuracion_vista (datos_evento){
     $("#valor_maximo .div").text(datos_evento.divisa);
     $(".apuesta span").text("APUESTA " + datos_evento.divisa);
 }
-function EventoDatosJsonNuevo(evento) {    
-    LimpiarApuestas();
-    procesar_hora(evento);//CLOCK
-    datos_configuracion_vista(evento);
-    OPCIONES_VENTA_VISTA.DETENER_HISTORIALJACKPOT = false;
-    OPCIONES_VENTA_VISTA.ajax_historial = HistorialJackpotDatosJson(evento.idEvento);    
-    setTimeout(function(){
-        $(".TOMBOLACUY").css("cursor","").show();
-    },500);    
-    ///fin jackpot
-}///FIN EventoDatosJson
-
 function responsivetombola(){
     var barralateral_visible = $(".sidebar .nav-sidebar").is(":visible");
     if(!barralateral_visible){
@@ -269,13 +307,11 @@ function HistorialJackpotDatosJson(idev){// AJAX RELOAD OF HISTORIAL DIVS , CADA
         url: basePath + 'ClienteVistaHistorialJackpotDatosJsonFk',
         data: {
             'idEvento'      : idev,
-            //'_token'        : $('input[name=_token]').val(),
         },
         beforeSend:function(){
         },
         success: function (response) {
             $("#row_datosevento #jugador").text(response.jugadores);
-            //$("#row_datosevento #jackpotsuma").text(divisa + " " + response.jackpotsuma);
             $(".historial_numeros").empty();
             $(response.historial).each(function(i,e){
                 var valor = e.valorGanador == "0"? "x" : e.valorGanador;
@@ -323,70 +359,10 @@ function ocultar_loadingoverlay_contador(){
     $("#contador_overlay").remove();
 }
 
-function iniciarContador(duration, display ,segundosantesbloqueo) { ///ACTUALIZAR  "PRÓXIMO EN"  
-    var timer = duration, minutos, segundos;
-
-    detenerContador();
-    OPCIONES_VENTA_VISTA.intervalo_contador = setInterval(function () {
-        var minutos = parseInt(timer / 60, 10);
-        var segundos = parseInt(timer % 60, 10);    
-        minutos = minutos < 10 ? "0" + minutos : minutos;
-        segundos = segundos < 10 ? "0" + segundos : segundos;
-        display.text(minutos + ":" + segundos);
-        // ///////segundos bloqueo        
-        if(OPCIONES_VENTA_VISTA.RECARGAR_TOMBOLA){
-            if(minutos == 0 && segundos <= segundosantesbloqueo){
-                detenerHistorialJackpot();
-                if($("#contador_overlay").length == 0){
-                    crear_loadingoverlay_contador();
-                }
-                if($("#contador_overlay").length > 0){
-                    $("#contador_overlay").text(segundos)
-                }
-            }
-            else{
-                var segundostotales = parseInt((parseInt(minutos)*60)) + parseInt(segundos);
-                if(segundostotales == segundosantesbloqueo){
-                    $.LoadingOverlay("show",{ image : OPCIONES_VENTA_VISTA.imagen_loadingoverlay_contador})
-                }
-            }
-            if(minutos == 0 && segundos == 0){ ///CONTADOR TERMINA 
-                detenerContador();
-                setTimeout(function(){
-                    ocultar_loadingoverlay_contador();
-                    // CargarClienteVistaTabla();
-                    //ClienteVistaAnimacionCuy();
-                    EventoActual();
-                },2000);
-            }
-        }
-        //fin segundos bloqueo
-        if (--timer < 0) {
-            timer = 0;// duration;
-        }
-    }, 1000);
-    setTimeout(function(){
-        activarBarraLoading(duration - segundosantesbloqueo);
-    },1000);
-}
-function ContadorProximoEvento(horaserv,fechaFinEvento,segundosantesbloqueo){
-    var proxima_fecha = moment(fechaFinEvento, "YYYY-MM-DD HH:mm:ss a");
-    var ahora = moment(horaserv);
-    var segundos = proxima_fecha.diff(ahora,'seconds');
-    $("#proximo_en2").text("--");
-    if(segundos > 0){
-        iniciarContador(segundos, $("#proximo_en2"),segundosantesbloqueo) ;
-    }
-    else{
-        if(typeof OPCIONES_VENTA_VISTA.intervalo_contador != "undefined"){
-            clearInterval(OPCIONES_VENTA_VISTA.intervalo_contador) 
-        }
-    }
-    console.log(horaserv);
-}
 function reloj_generar(horaserv){ ///actualizar HORA cada SEG.   intervalo_horaservidor
     detenerRelojServidor();
-    OPCIONES_VENTA_VISTA.intervalo_horaservidor = setInterval(function(){
+    OPCIONES_VENTA_VISTA.intervalo_horaservidor = setInterval(
+                            function(){
                                 horaserv = new Date(horaserv);
                                 horaserv = horaserv.setSeconds(horaserv.getSeconds() +1)
                                 horaserv = new Date(horaserv);
@@ -415,10 +391,10 @@ function reloj_generar(horaserv){ ///actualizar HORA cada SEG.   intervalo_horas
                                                     + ":" + segundos
                                                     + " " + dn;
                                 $('#fechaServidor').text(hora_servidor_final);
-                            },1000)
+                            }
+                            ,1000)
 }
-function evento_juegos(){
-    
+function evento_juegos(){    
 }
 
 function eventos_botones(eventoactual){
@@ -482,136 +458,131 @@ function eventos_botones(eventoactual){
     /////BOTONESSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS  DINERODEFAULT
     ///boton check
     $("#div_botones .check").off().on("click",function(){
-            var ID_EVENTO = $(".id_tituloconfiguracionevento").text();
-            if(ID_EVENTO == ""){
-                toastr.error("No hay Evento");return;
+        var ID_EVENTO = $(".id_tituloconfiguracionevento").text();
+        if(ID_EVENTO == ""){
+            toastr.error("No hay Evento");return;
+        }
+        var cantidadapuesta = $("#div_apuestas .seleccionadoapuesta").length;
+        var SUMAAPUESTAS = 0;
+        $("#div_apuestas .seleccionadoapuesta").each(function(i,e){
+            SUMAAPUESTAS = SUMAAPUESTAS + $(e).data("valor");
+        })
+        if(cantidadapuesta == 0){
+            toastr.error("Seleccione Apuesta")
+            return false;
+        }
+        var cantidadnumeros = $(".apuestacondicional_fila_datos .seleccionado,#numeros_tabla2 .seleccionado,#numeros_tabla .seleccionado, .rectangulo_izquierda.seleccionado").length;
+        if(cantidadnumeros == 0)
+        {
+            toastr.error("Seleccione Número")
+            return false;
+        }
+        var apuesta_fila = parseFloat(SUMAAPUESTAS).toFixed(2);
+        if(apuesta_fila < 1){
+            toastr.error("La apuesta no puede ser mínima al menor");
+            apuesta_fila = 1;
+        }
+        var array_apuestas_json = generar_json_apuestas();
+        var FILA_PARA_TABLA = {};
+        //$("#numeros_tabla .seleccionado , .rectangulo_izquierda.seleccionado")
+        $(".apuestacondicional_fila_datos .seleccionado,#numeros_tabla2 .seleccionado,#numeros_tabla .seleccionado, .rectangulo_izquierda.seleccionado")
+        .each(function(i,e){
+            array_apuestas_json = generar_json_apuestas();
+            var tiponumero = $(e).data("tipo");
+            var idTipoPago = $(e).data("idtipopago");
+            var colornumero = $(e).data("color");
+            var color2 = $(e).data("color2");
+            var descripcion = $(e).data("descripcion");
+            var valornumero = $(e).data("valor");
+            var idtipoapuesta = $(e).data("idtipoapuesta");
+            if(idTipoPago.toString() == "2"){
+                valornumero = colornumero;
             }
-            var cantidadapuesta = $("#div_apuestas .seleccionadoapuesta").length;
-            var SUMAAPUESTAS = 0;
-            $("#div_apuestas .seleccionadoapuesta").each(function(i,e){
-                SUMAAPUESTAS = SUMAAPUESTAS + $(e).data("valor");
-            })
-            if(cantidadapuesta == 0){
-                toastr.error("Seleccione Apuesta")
-                return false;
-            }
-            var cantidadnumeros = $(".apuestacondicional_fila_datos .seleccionado,#numeros_tabla2 .seleccionado,#numeros_tabla .seleccionado, .rectangulo_izquierda.seleccionado").length;
-            if(cantidadnumeros == 0)
-            {
-                toastr.error("Seleccione Número")
-                return false;
-            }
-            var apuesta_fila = parseFloat(SUMAAPUESTAS).toFixed(2);
-            if(apuesta_fila < 1){
-                toastr.error("La apuesta no puede ser mínima al menor");
-                apuesta_fila = 1;
-            }
-            var array_apuestas_json = generar_json_apuestas();
-            var FILA_PARA_TABLA = {};
-            //$("#numeros_tabla .seleccionado , .rectangulo_izquierda.seleccionado")
-            $(".apuestacondicional_fila_datos .seleccionado,#numeros_tabla2 .seleccionado,#numeros_tabla .seleccionado, .rectangulo_izquierda.seleccionado")
-            .each(function(i,e){
-                array_apuestas_json = generar_json_apuestas();
-                var tiponumero = $(e).data("tipo");
-                var idTipoPago = $(e).data("idtipopago");
-                var colornumero = $(e).data("color");
-                var color2 = $(e).data("color2");
-                var descripcion = $(e).data("descripcion");
-                var valornumero = $(e).data("valor");
-                var idtipoapuesta = $(e).data("idtipoapuesta");
-                if(idTipoPago.toString() == "2"){
-                    valornumero = colornumero;
+            var cuota = $(e).data("cuota");
+            apostado = false;
+            //console.log(array_apuestas_json);
+            $(array_apuestas_json).each(function(ii,ee){
+                if((ee.SELECCION).toString()==valornumero.toString()){
+                    apostado = true;
                 }
-                var cuota = $(e).data("cuota");
-                apostado = false;
-                //console.log(array_apuestas_json);
-                $(array_apuestas_json).each(function(ii,ee){
-                    if((ee.SELECCION).toString()==valornumero.toString()){
-                        apostado = true;
-                    }
-                })
-                console.log("apostado "+apostado+" "+valornumero)
-                if(!apostado){   ////*SI NO FUE APOSTADO AUN SE  AGREGA TR A TABLA */
-                    //cuota=tiponumero=="numero"?10:tiponumero=="rango"?10:tiponumero=="pares"?11:tiponumero=="impares"?14:15;
-                    FILA_PARA_TABLA.ID_EVENTO = ID_EVENTO;
-                    FILA_PARA_TABLA.SELECCION = valornumero;
-                    FILA_PARA_TABLA.CUOTA= cuota;
-                    FILA_PARA_TABLA.APUESTA= apuesta_fila;
+            })
+            console.log("apostado "+apostado+" "+valornumero)
+            if(!apostado){   ////*SI NO FUE APOSTADO AUN SE  AGREGA TR A TABLA */
+                //cuota=tiponumero=="numero"?10:tiponumero=="rango"?10:tiponumero=="pares"?11:tiponumero=="impares"?14:15;
+                FILA_PARA_TABLA.ID_EVENTO = ID_EVENTO;
+                FILA_PARA_TABLA.SELECCION = valornumero;
+                FILA_PARA_TABLA.CUOTA= cuota;
+                FILA_PARA_TABLA.APUESTA= apuesta_fila;
 
-                    var tr_tabla = $("#tabla_eventos tbody tr td:first-child:contains('-')").eq(0);
-                    if(tr_tabla.length == 0){
+                var tr_tabla = $("#tabla_eventos tbody tr td:first-child:contains('-')").eq(0);
+                if(tr_tabla.length == 0){
+                        $("#tabla_eventos tbody").append(
+                            $("<tr>")
+                                .attr("data-tipo",tiponumero)
+                                .attr("data-color",colornumero)
+                                .attr("data-color2",color2)
+                                .attr("data-descripcion",descripcion)
+                                .attr("data-valor",valornumero)
+                                .attr("data-idTipoPago",idTipoPago)
+                                .attr("data-idtipoapuesta",idtipoapuesta)
+                                .append(
+                                        $("<td>").text(FILA_PARA_TABLA.ID_EVENTO)
+                                        )
+                                .append(
+                                        $("<td>").text(FILA_PARA_TABLA.SELECCION)
+                                        )
+                                .append(
+                                        $("<td>").text(FILA_PARA_TABLA.CUOTA)
+                                        )
+                                .append(
+                                        $("<td>").text(parseFloat(FILA_PARA_TABLA.APUESTA).toFixed(2))
+                                                .append($("<div>").addClass("divcerrarfila").append($('<i class="icon  fa fa-close" style="display:inline"></i>')))
+                                        )
+                        )
+                        $(".divcerrarfila").off("click").on("click",function(){
 
-                         $("#tabla_eventos tbody").append(
-                                $("<tr>")
-                                    .attr("data-tipo",tiponumero)
-                                    .attr("data-color",colornumero)
-                                    .attr("data-color2",color2)
-                                    .attr("data-descripcion",descripcion)
-                                    .attr("data-valor",valornumero)
-                                    .attr("data-idTipoPago",idTipoPago)
-                                    .attr("data-idtipoapuesta",idtipoapuesta)
-                                    .append(
-                                            $("<td>").text(FILA_PARA_TABLA.ID_EVENTO)
-                                            )
-                                    .append(
-                                            $("<td>").text(FILA_PARA_TABLA.SELECCION)
-                                            )
-                                    .append(
-                                            $("<td>").text(FILA_PARA_TABLA.CUOTA)
-                                            )
-                                    .append(
-                                            $("<td>").text(parseFloat(FILA_PARA_TABLA.APUESTA).toFixed(2))
-                                                    .append($("<div>").addClass("divcerrarfila").append($('<i class="icon  fa fa-close" style="display:inline"></i>')))
-                                            )
-                            )
-                         $(".divcerrarfila").off("click").on("click",function(){
+                            var idtip=$(this).closest("tr").data("idtipoapuesta");
+                            $(".apuestasadicionalescontenedor .apuestacondicional_fila .apuestacondicional_fila_datos div[data-idtipoapuesta="+idtip+"],#numeros_tabla2 .numeros_rect2 div[data-idtipoapuesta="+idtip+"]")
+                                .css("cursor","pointer");
+                            $(this).closest("tr").remove();
+                            var totales_maximo = sacar_totales_y_maximo();
+                            $(".apuesta .rowtableeventos_footer_apuesta").text();
+                            $("#valor_total .val").text(parseFloat(totales_maximo.total).toFixed(2));
+                            $("#valor_total .div").text(eventoactual.divisa);
 
-                                var idtip=$(this).closest("tr").data("idtipoapuesta");
-                                $(".apuestasadicionalescontenedor .apuestacondicional_fila .apuestacondicional_fila_datos div[data-idtipoapuesta="+idtip+"],#numeros_tabla2 .numeros_rect2 div[data-idtipoapuesta="+idtip+"]")
-                                    .css("cursor","pointer");
-                                $(this).closest("tr").remove();
-                                var totales_maximo = sacar_totales_y_maximo();
-                                $(".apuesta .rowtableeventos_footer_apuesta").text();
-                                $("#valor_total .val").text(parseFloat(totales_maximo.total).toFixed(2));
-                                $("#valor_total .div").text(eventoactual.divisa);
+                            $("#valor_maximo .val").text(parseFloat(totales_maximo.maximo).toFixed(2));
+                            $("#valor_maximo .div").text(eventoactual.divisa);
 
-                                $("#valor_maximo .val").text(parseFloat(totales_maximo.maximo).toFixed(2));
-                                $("#valor_maximo .div").text(eventoactual.divisa);
-
-                         });
-                    }
-                    else{
-                        tr_tabla=tr_tabla.parent();
-                        tr_tabla.attr("data-tipo",tiponumero)       ;                 
-                        tr_tabla.attr("data-color",colornumero)       ;   
-                        tr_tabla.attr("data-valor",valornumero)       ;   
-
-                        $("td",tr_tabla).eq(0).text(FILA_PARA_TABLA.ID_EVENTO)
-                        $("td",tr_tabla).eq(1).text(FILA_PARA_TABLA.SELECCION)
-                        $("td",tr_tabla).eq(2).text(FILA_PARA_TABLA.CUOTA)
-                        $("td",tr_tabla).eq(3).text(parseFloat(FILA_PARA_TABLA.APUESTA).toFixed(2))
-                    }
-                    var totales_maximo = sacar_totales_y_maximo();
-
-                    $("#valor_total .val").text(parseFloat(totales_maximo.total).toFixed(2));
-                    $("#valor_total .div").text(eventoactual.divisa);
-                    $("#valor_total .div").text(eventoactual.divisa);
-
-                     $("#valor_maximo .val").text(parseFloat(totales_maximo.maximo).toFixed(2));
-                    $("#valor_maximo .div").text(eventoactual.divisa);
-
+                        });
                 }
                 else{
-                    toastr.error("Ya ingresó  "+valornumero);
+                    tr_tabla=tr_tabla.parent();
+                    tr_tabla.attr("data-tipo",tiponumero)       ;                 
+                    tr_tabla.attr("data-color",colornumero)       ;   
+                    tr_tabla.attr("data-valor",valornumero)       ;   
+
+                    $("td",tr_tabla).eq(0).text(FILA_PARA_TABLA.ID_EVENTO)
+                    $("td",tr_tabla).eq(1).text(FILA_PARA_TABLA.SELECCION)
+                    $("td",tr_tabla).eq(2).text(FILA_PARA_TABLA.CUOTA)
+                    $("td",tr_tabla).eq(3).text(parseFloat(FILA_PARA_TABLA.APUESTA).toFixed(2))
                 }
-            })///fin numerotabla seleccionados
+                var totales_maximo = sacar_totales_y_maximo();
 
-            $(".apuestacondicional_fila_datos .seleccionado,#numeros_tabla2 .seleccionado,#numeros_tabla .seleccionado, .rectangulo_izquierda.seleccionado")
-                .removeClass("seleccionado")
-                
+                $("#valor_total .val").text(parseFloat(totales_maximo.total).toFixed(2));
+                $("#valor_total .div").text(eventoactual.divisa);
+                $("#valor_total .div").text(eventoactual.divisa);
 
+                    $("#valor_maximo .val").text(parseFloat(totales_maximo.maximo).toFixed(2));
+                $("#valor_maximo .div").text(eventoactual.divisa);
+
+            }
+            else{
+                toastr.error("Ya ingresó  "+valornumero);
+            }
+        })///fin numerotabla seleccionados
+        $(".apuestacondicional_fila_datos .seleccionado,#numeros_tabla2 .seleccionado,#numeros_tabla .seleccionado, .rectangulo_izquierda.seleccionado")
+            .removeClass("seleccionado")
         $("#numeros_tabla .seleccionado").removeClass("seleccionado");
-
     })////FINNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNN on click boton check
 
         ///BOTON CERRAR  -- BORRAR
@@ -623,7 +594,8 @@ function eventos_botones(eventoactual){
 
         if($("#tabla_eventos tbody tr").length == "0"){
             toastr.error("No hay Apuestas");
-        }else
+        }
+        else
         {
             idtabla = "tabla_eventos";
             $("tbody","#" + idtabla).empty();
@@ -718,11 +690,10 @@ function eventos_botones(eventoactual){
         OPCIONES_VENTA_VISTA.RECARGAR_TOMBOLA = false;
     })
 }
-
 function generar_json_apuestas(){
     var idtabla = "tabla_eventos";
     var array_apuestas = [];
-    $("tbody tr","#"+idtabla).each(function(i,e){
+    $("tbody tr","#" + idtabla).each(function(i,e){
         var tr = e;
         if($("td:eq(0)",tr).text()!="-"){
         var filaapuesta = {};
@@ -828,74 +799,6 @@ function sacar_totales_y_maximo(){
     return datos;
 }  ///FIN sacar_totales_y_maximo();
 
-function GeneralTicketModal(ticketobjeto_imprimir){
-//////mostar codigoqr y codigo de barras para ticket en modal
-    var TICKET_IMPRIMIR = ticketobjeto_imprimir;
-    Id_Ticket = TICKET_IMPRIMIR.Id_Ticket;
-    codigo_barrahtml = TICKET_IMPRIMIR.codigo_barrahtml;
-    qrcode_src = TICKET_IMPRIMIR.qrcode_src;
-    codigo_barra_src = TICKET_IMPRIMIR.codigo_barra_src;
-    var divisa = TICKET_IMPRIMIR.simbolo;
-    var modal = $("#modal_imprimir_cancelar");
-
-    let imagen_juego = OPCIONES_VENTA_VISTA.ubicacion_imagenes_juego+TICKET_IMPRIMIR.logo
-    $("#divimpresion #imagen_evento",modal).attr("src",imagen_juego);
-
-    $("#divimpresion #IDTique",modal).text(Id_Ticket);
-    $("#divimpresion #IDUnidad",modal).text(TICKET_IMPRIMIR.Id_Unidad)
-    $("#divimpresion #NroEvento",modal).text(TICKET_IMPRIMIR.Nro_Evento)
-    $("#divimpresion #descripcion",modal).text(TICKET_IMPRIMIR.Desc)
-    $("#divimpresion #datos_filas",modal).empty()
-    $(TICKET_IMPRIMIR.apuestas).each(function(i,e){
-        $("#divimpresion #datos_filas",modal).append($("<div>").attr("style","width:100%;display:table")
-                .append(
-                $("<div>").attr("style","width:30%;float:LEFT;text-align:left").text(e.evento)
-                    )
-                .append(
-                $("<div>").attr("style","width:30%;float:LEFT;text-align:left").text(e.descripcion)
-                    )
-                .append(
-                $("<div>").attr("style","width:25%;float:LEFT;text-align:left").text(e.multiplicadorDefecto)
-                    )
-
-                  .append(
-                $("<div>").attr("style","width:15%;float:LEFT;text-align:left").text(e.montoApostado)
-                    )
-        )
-    })
-    $("#divimpresion #total_ticket",modal).text(divisa+" "+parseFloat(TICKET_IMPRIMIR.TotalTicket).toFixed(2) );
-    $("#divimpresion #impreso_en",modal).text(moment(new Date()).format("YYYY-MM-DD HH:mm:s"));
-    $("#divimpresion #impreso_por",modal).text(TICKET_IMPRIMIR.ImpresoPor);
-    $("#divimpresion #impreso_por2",modal).text($("#tienda").val());
-    $("#divimpresion #PremioMaximoPotencial",modal).text(divisa+" "+TICKET_IMPRIMIR.premioMaximoPagar);
-    $("#divimpresion #PremioMaximoAPagar",modal).text(divisa+" "+TICKET_IMPRIMIR.premioMaximoPotencial);
-    $("#imagen_qrcode",modal).attr("src","data:image/png;base64,"+qrcode_src);
-    $("#imagen_codigobarra",modal).attr("src","data:image/png;base64,"+codigo_barra_src);
-
-     $("#btnCancelar",modal).off("click").on("click",function(){
-        var js = $.confirm({
-                icon: 'fa fa-spinner fa-spin',
-                title: 'Cancelar Ticket',
-                theme: 'black',
-                animationBounce: 1.5,
-                columnClass: 'col-md-6 col-md-offset-3',
-                confirmButtonClass: 'btn-info',
-                cancelButtonClass: 'btn-warning',
-                confirmButton: "CONFIRMAR", 
-                cancelButton: 'CERRAR',
-                content: "Está seguro de Cancelar Ticket " + TICKET_IMPRIMIR.Id_Ticket+" ?",
-                confirm: function () {
-                        CancelarTicket(TICKET_IMPRIMIR.Id_Ticket,TICKET_IMPRIMIR.Nro_Evento);
-                },
-                cancel: function () {
-                }
-    });
-        // CancelarTicket(TICKET_IMPRIMIR.Id_Ticket,TICKET_IMPRIMIR.Nro_Evento);
-    })
-     $("#modal_imprimir_cancelar").modal("show");
-
-}
-
 function get_apuestas(eventoactual){ ///get Apuestas que Cliente ha Hecho            tabla ID EVENTOS ELECCIÓN CUOTA APUESTA   Vista Venta
     var apuestas = [];
     $("#tabla_eventos tbody tr").each(function(i,e){
@@ -934,30 +837,6 @@ function cv_esta_ingresado(ap_array,buscar){//buscar si Apuesta ya fue ingresada
     return encontro;
 }
 
-function procesar_hora(eventoactual){ //generar HORA VistaCliente
-    var time_now = get_hora();
-    var time_event_seconds = addSecondsToCurrentDate(OPCIONES_VENTA_VISTA.TIEMPO_VISTA_VENTA);
-
-    var proxima_fecha = moment(time_event_seconds, "YYYY-MM-DD HH:mm:ss a");
-    var ahora = moment( time_now );
-    var segundos = proxima_fecha.diff(ahora,'seconds');
-    reloj_generar( time_now );
-
-    if(segundos < 1){
-        console.warn("Evento " + eventoactual.IdEvento + " con fecha fin= " + proxima_fecha.format("YYYY-MM-DD HH:mm:ss")+" menor a hora actual=" + ahora.format("YYYY-MM-DD HH:mm:ss")+", RECARGANDO....");
-        toastr.error("Evento #" + eventoactual.IdEvento + " ya finalizó, Recargar")
-        detenerContador();
-        $("#proximo_en2").text("--");
-        $("#barra_loading").css("width","100%");
-        $.LoadingOverlay("hide");
-        $("#contador_overlay").remove();
-        $("#recargar_tabla").text("Recargar").show();
-    } else {
-        $("#recargar_tabla").hide().text("");
-        ContadorProximoEvento( time_now ,time_event_seconds, OPCIONES_VENTA_VISTA.SEG_BLOQUEO_ANTES_EVENTO );
-    }
-}
-
 function get_hora() {
     const currentDate = new Date();
     // Get the current date components
@@ -986,37 +865,4 @@ function addSecondsToCurrentDate(secondsToAdd) {
 
     const formattedDateTime = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     return formattedDateTime;
-}
-
-function eventos_botones_modalbuscar(eventoactual){
-    /////modal_buscar ticket para pagar
-    $('#modal_buscar .digitador .digito').off().on('click',function(){
-        valor = $(this).text();
-        valortxt = $("#modal_buscar #ticket_txt").val();
-        valortxt = valortxt+valor;
-        $("#modal_buscar #ticket_txt").val(valortxt);
-    })
-
-    $('#modal_buscar .digitador .borrar').off().on('click',function(){
-        var valortxt = $("#modal_buscar #ticket_txt").val();
-        valortxt = valortxt.substring(0,valortxt.length - 1);
-        $("#modal_buscar #ticket_txt").val(valortxt);
-    })
-
-    $("#modal_buscar #btn_buscar_ticket").off().on("click",function(e){
-        e.preventDefault(); 
-        if( $("#modal_buscar #ticket_txt").val().trim()!=""){
-            $("#modal_buscar #btn_buscar_ticket").attr("disabled",true);
-            $("#modal_buscar #btn_buscar_ticket").LoadingOverlay("show");
-            var objetobuscar = {};
-            objetobuscar.idTicket = $("#modal_buscar #ticket_txt").val().trim();
-            BuscarTicket(objetobuscar);
-            $("#modal_buscar #ticket_txt").val("");
-        }else{
-            toastr.error("Ingrese Número Ticket para pagar");
-            $("#modal_buscar #btn_buscar_ticket").LoadingOverlay("hide");
-            $("#modal_buscar #btn_buscar_ticket").attr("disabled",false);
-        }
-    })
-    ///////fin modal buscar ticket para pagar
 }
