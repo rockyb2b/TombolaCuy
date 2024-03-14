@@ -8,7 +8,6 @@
 	<link rel="stylesheet" href="{{asset('../components/toastr/toastr.min.css')}}">
 	<link rel="stylesheet" href="{{asset('../css/Animacion/estilos_animacion_cuy.css')}}">
 	<link rel="stylesheet" href="{{asset('../css/Animacion/ganadorEstilo.css')}}">
-    
 	<script src="{{asset('../assets/js/jquery3_3_1.min.js')}}"></script>
 	<script src="{{asset('../components/toastr/toastr.min.js')}}"></script>
 	<script src="{{asset('../components/loadingoverlay/loadingoverlay.min.js')}}"></script>
