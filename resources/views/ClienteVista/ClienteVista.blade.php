@@ -41,11 +41,9 @@
 <body class="@yield('body-class','sidebar-style loaded expanded')">
 <!-- {{--<body class="sidebar-style loaded">--}} -->
     <!-- MAIN CONTAINER -->
-    <main class="main-container">
-        <div class="content container-fluid">            
-            @include('ClienteVista.ClienteVistaCajaTabla')
-        </div>
-    </main>
+    <div class="content container-fluid" id="contenedor_venta">            
+        @include('ClienteVista.ClienteVistaCajaTabla')
+    </div>
     <!-- SCRIPTS -->
     <script src="{{asset('../js/jquery-2.2.4.min.js')}}"></script>
     <script src="{{asset('../components/jquery-ui/jquery-ui.min.js')}}"></script>

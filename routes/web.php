@@ -150,8 +150,10 @@ Route::post('EventoActual', 'ClienteVistaController@EventoActual');
 Route::post('GuardarApuestaCliente', 'ClienteVistaController@GuardarApuestaCliente');
 
 ///animacion cuy
+Route::get('ClienteVistaCuy', 'ClienteVistaController@ClienteVistaCuy')->name('ClienteVistaCuy');
 Route::get('ClienteVistaAnimacionCuy', 'ClienteVistaController@ClienteVistaAnimacionCuy')->name('ClienteVistaAnimacionCuy');
-Route::post('ClienteVistGanadorEvento', 'ClienteVistaController@GanadorEvento')->name('ClienteVistGanadorEvento');
+Route::post('ClienteVistaGanadorEvento', 'ClienteVistaController@GanadorEvento')->name('ClienteVistaGanadorEvento');
+Route::post('ClienteVistaFinalizarEvento', 'ClienteVistaController@ClienteVistaFinalizarEvento')->name('ClienteVistaFinalizarEvento');
     //Route::post('CajaTablaFk', 'VentaController@CajaTablaFk');
 
 /////////////////////////

@@ -36,7 +36,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -183,7 +182,6 @@
                                     data-idTipoApuesta="{{$div->idTipoApuesta}}" 
                                     data-idTipoPago="{{$div->idTipoPago}}" 
                                                     style="background-color:{{$div->rgb}};color:{{$div->rgbLetra}}" 
-                                    
                                     data-tipo="numero" 
                                     data-color="{{$div->rgb}}"
                                     data-valor={{$div->valorapuesta}} 
@@ -223,13 +221,8 @@
                                     >{{$div->valorapuesta}}</div>
                                 @endforeach
                             </div>
-                                <div class=" margen_bottom_numeros"></div>
-                                            <!--  <div class="rowhistorial">
-                                    <div class="historial">HISTORIAL</div>
-                                </div>-->
+                            <div class=" margen_bottom_numeros"></div>
                         </div>
-                            <!--div col 10-->
-                            <!-- <div class="col-xs-12 col-md-1"></div> -->
                     </div><!--contenedor_tablaprincipal-->
                 </div><!--FIN TABLA PLENO-->
                 <div class="tabla_apuestas_adicionales" >
@@ -305,9 +298,7 @@
                                     </div>     
                                 </div>
                             <?php }?>
-                        <!-- <div class="rectangulo_rojo">1</div> -->
                         </div>    
-
                     </div><!--FIN class apuestas_adicionales-->
             <!--fin div rowhisto hisotrila numeros-->
                 </div><!--fin div tabla_apuestas_adicionales-->

@@ -75,8 +75,6 @@ function cuyrandom() { //// genera posición random =>   b  ,  EJECUTA  cuy_rota
         cancelAnimationFrame(var_cuymoviendo);
     }
 }
-
-
 ////// mueve cuy a posicion   variable b       a=> nueva posicion cuy
 function mover_cuy() {    ///var_cuymoviendo  => animationframe
     model.visible = true;
@@ -215,7 +213,6 @@ function moveracaja(location) {
         cancelAnimationFrame(cuymoviendo);
     }
 }
-
 function moverderecha() {
     $("#DIV_ESPERA").hide();
     mixer.update(clock.getDelta());

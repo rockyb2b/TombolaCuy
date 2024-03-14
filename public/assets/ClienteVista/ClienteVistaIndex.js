@@ -2,7 +2,7 @@ OPCIONES_VENTA_VISTA = {
     sessionToken            :   getUrlParameter('sessionToken'),
     playerID                :   getUrlParameter('playerID'),
     gameID                  :   getUrlParameter('gameID'),
-    TIEMPO_VISTA_VENTA      :   30,   //30 SEC.    DURACIÓN VISTA VENTA
+    TIEMPO_VISTA_VENTA      :   8,   //30 SEC.    DURACIÓN VISTA VENTA
     SEG_BLOQUEO_ANTES_EVENTO:   2,//10,   //           PANTALLA SE BLOQUEA CUANDO FALTA __ SEGS
     TIEMPO_INTERVALO_HISTORIALJACKPOT : 3000,    //CADA CUANTO SE ACTUALIZA HISTORIAL Y JACKPOT
     USUARIO                 :    1,
@@ -19,12 +19,25 @@ OPCIONES_VENTA_VISTA = {
 
     sonidos: {
         numeros             : "/sound/numeros_click.wav",
-        apuestas_adicionales: "/sound/numeros_click.wav",
-        apuesta_check       : "/sound/numeros_click.wav",
-        apuesta_cancel       : "/sound/numeros_click.wav",
+        apuestas_adicionales: "/sound/Botones y otros/button-9.wav",
+        apuestas_botones    : "/sound/Botones y otros/button-6.wav",
+        apuesta_check       : "/sound/Botones y otros/button-28.wav",
+        apuesta_cancel      : "/sound/Botones y otros/button-7.wav",
         buscar_ticket       : "/sound/numeros_click.wav",
-        imprimir_ticket     : "/sound/numeros_click.wav"
+        bet     : "/sound/Botones y otros/COINS Collect Jackpot Win 03.wav",
+        contador_para_vista_cuy : "/sound/clock-ticking-4",
+
+        vista_venta_contador_final : "/sound/Botones y otros/clock-ticking-4.wav",
+
+        vista_cuy_bg : "/sound/Fondo/8-bit loop (loop).mp3",
+        vista_venta_bg : "/sound/Fondo/Anttis instrumentals - Background Music 2.mp3",
+        vista_cuy_pasos : "/sound/Cuy/000205346_prev.mp3",
+        vista_cuy_pasos_portada : "/sound/Cuy/000205346_prev.mp3",
+        vista_cuy_ganador : "/sound/Win Lose/brass-fanfare-with-timpani-and-winchimes-reverberated-146260.mp3"
     },
+    sonido : 1,
+    
+
     RECARGAR_TOMBOLA : true,////despues de acabado el conteo .  detener al mostrar modal
 
     TIMEOUT_HistorialJackpotDatosJson : null, //settimeout para consultar historial
@@ -34,9 +47,71 @@ OPCIONES_VENTA_VISTA = {
     intervalo_horaservidor : null , //variable setinterval para actualizar reloj
     intervalo_contador : null //variable setinterval para contador para terminar evento
 }
+SONIDOS_LOOPS = {
+    sonido_vista_venta_contador_final: (() => { 
+        const audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.vista_venta_contador_final);
+        audio.loop = true; 
+        return audio; 
+    })(),
+
+    sonido_vista_cuy_bg: (() => { 
+        const audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.vista_cuy_bg);
+        audio.volume = 0.1;
+        audio.loop = true; 
+        return audio; 
+    })() ,
+    sonido_vista_venta_bg: (() => { 
+        const audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.vista_venta_bg);
+        audio.volume = 0.5;
+        audio.loop = true; 
+        return audio; 
+    })(),
+
+    sonido_vista_cuy_pasos_portada: (() => { 
+        const audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.vista_cuy_pasos_portada);
+        audio.volume = 0.2;
+        audio.loop = true;
+        return audio; 
+    })(),
+
+    sonido_vista_cuy_pasos: (() => { 
+        const audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.vista_cuy_pasos);
+        audio.loop = true; 
+        return audio; 
+    })(),
+
+    sonido_vista_cuy_ganador: (() => { 
+        const audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.vista_cuy_ganador);
+        audio.loop = true; 
+        return audio; 
+    })()
+
+}
 
 
 $(document).ready(function () {   
     $("body").css("overflow","hidden");    
     EventoActual();//en ClienteVistaFunciones.js
+    ANIMACION_INICIAR_RENDER();
+
 });
+
+function clientevistaindex_mostrar_venta(){
+    SONIDOS_LOOPS.sonido_vista_venta_bg.play();
+    // detener_var_correr_spline_portada();
+    
+    SONIDOS_LOOPS.sonido_vista_cuy_bg.pause();
+    SONIDOS_LOOPS.sonido_vista_cuy_pasos_portada.pause();
+    SONIDOS_LOOPS.sonido_vista_cuy_pasos.pause();
+    SONIDOS_LOOPS.sonido_vista_cuy_ganador.pause();
+    $("#VISTA_CUY").hide();
+    $("#VISTA_VENTA").show();
+    responsivetombola();//updates tbl apuestas height repsonsive
+}
+
+function clientevistaindex_mostrar_cuy(){
+    SONIDOS_LOOPS.sonido_vista_venta_bg.pause();
+    SONIDOS_LOOPS.sonido_vista_cuy_bg.play();
+    $("#VISTA_VENTA").hide();
+    $("#VISTA_CUY").show();
+}

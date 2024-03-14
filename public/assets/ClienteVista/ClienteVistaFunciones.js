@@ -19,7 +19,7 @@ function CargarClienteVistaTabla() { //results  Venta.CajaTabla view with variab
         },
         success: function (response) {
             $('.modal').modal('hide');
-            $(".content.container-fluid").html(response.html);
+            $("#contenedor_venta").html(response.html);
             if(response.error != "")
             {
                 toastr.error(response.error);
@@ -58,6 +58,7 @@ function EventoActual() { //results consulta  datos evento actual e inicia conta
                 toastr.error(response.error);
             }
             INICIAR(response.eventoactual);
+            actualizar_evento_titulo(response.eventoactual.idEvento)
             $.LoadingOverlay("hide");
         },
        error: function (jqXHR, textStatus, errorThrown) {
@@ -71,7 +72,6 @@ function EventoActual() { //results consulta  datos evento actual e inicia conta
         }
     })
 }
-
 function INICIAR(evento = null)
 {
     $(".TOMBOLACUY").show();
@@ -105,8 +105,8 @@ function procesar_hora(eventoactual){ //generar HORA VistaCliente
     reloj_generar( time_now );
 
     if(segundos < 1){
-        console.warn("Evento " + eventoactual.IdEvento + " con fecha fin= " + proxima_fecha.format("YYYY-MM-DD HH:mm:ss")+" menor a hora actual=" + ahora.format("YYYY-MM-DD HH:mm:ss")+", RECARGANDO....");
-        toastr.error("Evento #" + eventoactual.IdEvento + " ya finalizó, Recargar")
+        console.warn("Evento " + eventoactual.idEvento + " con fecha fin= " + proxima_fecha.format("YYYY-MM-DD HH:mm:ss")+" menor a hora actual=" + ahora.format("YYYY-MM-DD HH:mm:ss")+", RECARGANDO....");
+        toastr.error("Evento #" + eventoactual.idEvento + " ya finalizó, Recargar")
         detenerContador();
         $("#proximo_en2").text("--");
         $("#barra_loading").css("width","100%");
@@ -115,17 +115,17 @@ function procesar_hora(eventoactual){ //generar HORA VistaCliente
         $("#recargar_tabla").text("Recargar").show();
     } else {
         $("#recargar_tabla").hide().text("");
-        ContadorProximoEvento( time_now ,time_event_seconds, OPCIONES_VENTA_VISTA.SEG_BLOQUEO_ANTES_EVENTO );
+        ContadorProximoEvento( eventoactual.idEvento , time_now ,time_event_seconds, OPCIONES_VENTA_VISTA.SEG_BLOQUEO_ANTES_EVENTO );
     }
 }
 
-function ContadorProximoEvento(horaserv,fechaFinEvento,segundosantesbloqueo){
+function ContadorProximoEvento(evento_id , horaserv,fechaFinEvento,segundosantesbloqueo){
     var proxima_fecha = moment(fechaFinEvento, "YYYY-MM-DD HH:mm:ss a");
     var ahora = moment(horaserv);
     var segundos = proxima_fecha.diff(ahora,'seconds');
     $("#proximo_en2").text("--");
     if(segundos > 0){
-        iniciarContador(segundos, $("#proximo_en2"),segundosantesbloqueo) ;
+        iniciarContador(evento_id , segundos, $("#proximo_en2"),segundosantesbloqueo) ;
     }
     else{
         if(typeof OPCIONES_VENTA_VISTA.intervalo_contador != "undefined"){
@@ -134,8 +134,8 @@ function ContadorProximoEvento(horaserv,fechaFinEvento,segundosantesbloqueo){
     }
     console.log(horaserv);
 }
-function iniciarContador(duration, display ,segundosantesbloqueo) { ///ACTUALIZAR  "PRÓXIMO EN" ,  barra loading evento 
-    var timer = duration, minutos, segundos;
+function iniciarContador(evento_id , duration, display ,segundosantesbloqueo) { ///ACTUALIZAR  "PRÓXIMO EN" ,  barra loading evento 
+    var timer = duration;
     detenerContador();
     OPCIONES_VENTA_VISTA.intervalo_contador = setInterval(function () {
         var minutos = parseInt(timer / 60, 10);
@@ -153,6 +153,8 @@ function iniciarContador(duration, display ,segundosantesbloqueo) { ///ACTUALIZA
                 if($("#contador_overlay").length > 0){
                     $("#contador_overlay").text(segundos)
                 }
+
+                SONIDOS_LOOPS.sonido_vista_venta_contador_final.play();                
             }
             else{
                 var segundostotales = parseInt((parseInt(minutos)*60)) + parseInt(segundos);
@@ -160,11 +162,14 @@ function iniciarContador(duration, display ,segundosantesbloqueo) { ///ACTUALIZA
                     $.LoadingOverlay("show",{ image : OPCIONES_VENTA_VISTA.imagen_loadingoverlay_contador})
                 }
             }
-            if(minutos == 0 && segundos == 0){ ///CONTADOR TERMINA 
+            if(minutos == 0 && segundos == 0){ ///CONTADOR TERMINA
+                SONIDOS_LOOPS.sonido_vista_venta_contador_final.pause();
                 detenerContador();
                 setTimeout(function(){
                     ocultar_loadingoverlay_contador();
-                    EventoActual();/////INICIAR ANIMACION CUY ACA
+                    // EventoActual();/////INICIAR ANIMACION CUY ACA
+                    clientevistaindex_mostrar_cuy();
+                    get_evento_ganador(evento_id);  //en animacion.js
                 },2000);
             }
         }
@@ -276,7 +281,7 @@ function responsivetombola(){
     else{
         $(".CONTENEDOR_TOMBOLACUY").css("padding-left","53px");
     }
-    var heighttbody = $(".rowtablaeventos").outerHeight()-$("#tabla_eventos thead tr").height()
+    var heighttbody = $(".rowtablaeventos").outerHeight() - $("#tabla_eventos thead tr").height()
     $("#tabla_eventos tbody").attr("style","height:" + heighttbody + "px")
 
     $(".responsive").each(function(i,e){
@@ -410,6 +415,8 @@ function eventos_botones(eventoactual){
             var ESTA = cv_esta_ingresado(apu,idtipo_ap);
             if(!ESTA)
             {
+                var audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.apuestas_adicionales);
+                audio.play();
                 $(this).css("cursor","pointer")
                 $(this).toggleClass("seleccionado") ;
             }
@@ -441,7 +448,7 @@ function eventos_botones(eventoactual){
     //////botones apuesta  1 2 5  10 50 100
     $("#div_apuestas [data-tipo='apuesta']").off().on("click",function(e){
         if(typeof eventoactual != "undefined"){
-            var audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.apuesta_check);
+            var audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.apuestas_botones);
             audio.play();
             $(this).toggleClass("seleccionadoapuesta") ;
             var SUMAAPUESTAS = 0;
@@ -508,55 +515,58 @@ function eventos_botones(eventoactual){
             })
             console.log("apostado "+apostado+" "+valornumero)
             if(!apostado){   ////*SI NO FUE APOSTADO AUN SE  AGREGA TR A TABLA */
+                var audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.apuesta_check);
+                audio.play();
                 //cuota=tiponumero=="numero"?10:tiponumero=="rango"?10:tiponumero=="pares"?11:tiponumero=="impares"?14:15;
                 FILA_PARA_TABLA.ID_EVENTO = ID_EVENTO;
                 FILA_PARA_TABLA.SELECCION = valornumero;
-                FILA_PARA_TABLA.CUOTA= cuota;
-                FILA_PARA_TABLA.APUESTA= apuesta_fila;
+                FILA_PARA_TABLA.CUOTA = cuota;
+                FILA_PARA_TABLA.APUESTA = apuesta_fila;
 
                 var tr_tabla = $("#tabla_eventos tbody tr td:first-child:contains('-')").eq(0);
                 if(tr_tabla.length == 0){
-                        $("#tabla_eventos tbody").append(
-                            $("<tr>")
-                                .attr("data-tipo",tiponumero)
-                                .attr("data-color",colornumero)
-                                .attr("data-color2",color2)
-                                .attr("data-descripcion",descripcion)
-                                .attr("data-valor",valornumero)
-                                .attr("data-idTipoPago",idTipoPago)
-                                .attr("data-idtipoapuesta",idtipoapuesta)
-                                .append(
-                                        $("<td>").text(FILA_PARA_TABLA.ID_EVENTO)
-                                        )
-                                .append(
-                                        $("<td>").text(FILA_PARA_TABLA.SELECCION)
-                                        )
-                                .append(
-                                        $("<td>").text(FILA_PARA_TABLA.CUOTA)
-                                        )
-                                .append(
-                                        $("<td>").text(parseFloat(FILA_PARA_TABLA.APUESTA).toFixed(2))
-                                                .append($("<div>").addClass("divcerrarfila").append($('<i class="icon  fa fa-close" style="display:inline"></i>')))
-                                        )
-                        )
-                        $(".divcerrarfila").off("click").on("click",function(){
+                    $("#tabla_eventos tbody").append(
+                        $("<tr>")
+                            .attr("data-tipo",tiponumero)
+                            .attr("data-color",colornumero)
+                            .attr("data-color2",color2)
+                            .attr("data-descripcion",descripcion)
+                            .attr("data-valor",valornumero)
+                            .attr("data-idTipoPago",idTipoPago)
+                            .attr("data-idtipoapuesta",idtipoapuesta)
+                            .append(
+                                    $("<td>").text(FILA_PARA_TABLA.ID_EVENTO)
+                                    )
+                            .append(
+                                    $("<td>").text(FILA_PARA_TABLA.SELECCION)
+                                    )
+                            .append(
+                                    $("<td>").text(FILA_PARA_TABLA.CUOTA)
+                                    )
+                            .append(
+                                    $("<td>").text(parseFloat(FILA_PARA_TABLA.APUESTA).toFixed(2))
+                                            .append($("<div>").addClass("divcerrarfila").append($('<i class="icon  fa fa-close" style="display:inline"></i>')))
+                                    )
+                    )
+                    $(".divcerrarfila").off("click").on("click",function(){
+                        var audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.apuesta_cancel);
+                        audio.play();
+                        var idtip = $(this).closest("tr").data("idtipoapuesta");
+                        $(".apuestasadicionalescontenedor .apuestacondicional_fila .apuestacondicional_fila_datos div[data-idtipoapuesta="+idtip+"],#numeros_tabla2 .numeros_rect2 div[data-idtipoapuesta="+idtip+"]")
+                            .css("cursor","pointer");
+                        $(this).closest("tr").remove();
+                        var totales_maximo = sacar_totales_y_maximo();
+                        $(".apuesta .rowtableeventos_footer_apuesta").text();
+                        $("#valor_total .val").text(parseFloat(totales_maximo.total).toFixed(2));
+                        $("#valor_total .div").text(eventoactual.divisa);
 
-                            var idtip=$(this).closest("tr").data("idtipoapuesta");
-                            $(".apuestasadicionalescontenedor .apuestacondicional_fila .apuestacondicional_fila_datos div[data-idtipoapuesta="+idtip+"],#numeros_tabla2 .numeros_rect2 div[data-idtipoapuesta="+idtip+"]")
-                                .css("cursor","pointer");
-                            $(this).closest("tr").remove();
-                            var totales_maximo = sacar_totales_y_maximo();
-                            $(".apuesta .rowtableeventos_footer_apuesta").text();
-                            $("#valor_total .val").text(parseFloat(totales_maximo.total).toFixed(2));
-                            $("#valor_total .div").text(eventoactual.divisa);
+                        $("#valor_maximo .val").text(parseFloat(totales_maximo.maximo).toFixed(2));
+                        $("#valor_maximo .div").text(eventoactual.divisa);
 
-                            $("#valor_maximo .val").text(parseFloat(totales_maximo.maximo).toFixed(2));
-                            $("#valor_maximo .div").text(eventoactual.divisa);
-
-                        });
+                    });
                 }
                 else{
-                    tr_tabla=tr_tabla.parent();
+                    tr_tabla = tr_tabla.parent();
                     tr_tabla.attr("data-tipo",tiponumero)       ;                 
                     tr_tabla.attr("data-color",colornumero)       ;   
                     tr_tabla.attr("data-valor",valornumero)       ;   
@@ -572,9 +582,8 @@ function eventos_botones(eventoactual){
                 $("#valor_total .div").text(eventoactual.divisa);
                 $("#valor_total .div").text(eventoactual.divisa);
 
-                    $("#valor_maximo .val").text(parseFloat(totales_maximo.maximo).toFixed(2));
+                $("#valor_maximo .val").text(parseFloat(totales_maximo.maximo).toFixed(2));
                 $("#valor_maximo .div").text(eventoactual.divisa);
-
             }
             else{
                 toastr.error("Ya ingresó  "+valornumero);
@@ -624,7 +633,7 @@ function eventos_botones(eventoactual){
         }
         else
         {
-            var audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.imprimir_ticket);
+            var audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.bet);
             audio.play();
 
             var TICKET_IMPRIMIR = {};

@@ -225,8 +225,6 @@ class Evento extends Model
         $evento->save();
         return $evento;
     }
-
-
     public static function RegistrarEvento($juego, $fechaIni, $fechaEventoFin, $posiciones)
     {
         $token_generado = str_random(8);
@@ -246,8 +244,6 @@ class Evento extends Model
         $evento->save();
         return $evento;
     }
-    
-
     public static function EventoActual($IdJuego)
     {
         $resultado = DB::table('evento as e')
@@ -504,6 +500,19 @@ class Evento extends Model
             $fecha_fin = date("Y-m-d H:i:s", strtotime($fecha_inicio . " + $tiempo_vista_venta seconds"));
             $evento->fechaEvento = $fecha_inicio;
             $evento->fechaFinEvento = $fecha_fin;
+            $evento->save();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static function FinalizarEvento($id){
+        $evento = Evento::find($id); //
+        if ($evento) {            
+            $evento->fechaFinEvento = date("Y-m-d H:i:s");
+            $evento->estadoEvento = 2;
+            $evento->updated_at = date("Y-m-d H:i:s");
             $evento->save();
             return true;
         } else {

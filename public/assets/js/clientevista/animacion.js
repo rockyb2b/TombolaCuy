@@ -4,41 +4,31 @@ $(".loadingoverlay").css("background-color","rgba(255, 255, 255, 0.3)");
 
 $("#DIV_EVENTOESPERANDO").hide();
 $("#DIV_TITULOEVENTO").hide();
-IPSERVIDOR_WEBSOCKETS = $("#IPSERVIDOR_WEBSOCKETS").val();
-PUERTO_WEBSOCKETS = $("#PUERTO_WEBSOCKETS").val();
-TIMEOUT_CONEXIONWEBSOCKETS_CORTAR = 5000;
 CONTROLES = false;
-
 GANADOR_DE_EVENTO = "";
 EVENTO_ID = "";
-
 CLIENTEVISTA_ANIMACION = {
-
     estadistica : null
 }
+
+// $(document).ready(function () {
+//     //bloquear_teclas_mouse();
+//     ANIMACION_INICIAR_RENDER();
+// });
+
 
 var VENTANA_ACTIVA = true;
 EVENTO_YA_PASO = false;
 window.addEventListener('blur', function() {
-   //not running full
    VENTANA_ACTIVA = false;
    console.log("VENTANA_ACTIVA FALSE" );
-   // if(EVENTO_YA_PASO){
-   //      window.reload();
-   // }
 }, false);
 
 window.addEventListener('focus', function() {
-   //running optimal (if used)
     VENTANA_ACTIVA = true;
     console.log("VENTANA_ACTIVA TRUE" )
-
 }, false);
 
-$(document).ready(function () {
-    //bloquear_teclas_mouse();
-    INICIAR_RENDER();
-});
 
 if (WEBGL.isWebGLAvailable() === false) {
     document.body.appendChild(WEBGL.getWebGLErrorMessage());
@@ -57,36 +47,31 @@ var i = 0;
 var controls;
 var posicionZ = 0;
 
-
 function getObjeto_caja(nombrebuscar){
-    // arraycajas=modelCaja.children[0].children[0].children;
-    arraycajas=modelCaja.children[0].children[0].children[0].children;
-    objetoretornar=null;
+    arraycajas = modelCaja.children[0].children[0].children[0].children;
+    var objetoretornar = null;
     $(arraycajas).each(function(i,e){
-        // nombre=e.material.map.name;///1.png
-         nombre=e.name;///1.png
-        //nombre=nombre.substring(0,nombre.indexOf("."));
-        if(nombre==nombrebuscar){
-            objetoretornar= e;
+         nombre = e.name;///1.png
+        if(nombre == nombrebuscar){
+            objetoretornar = e;
             return false;
         }
     })
     return objetoretornar;
 }
-
 function get_maderas(){
-    maderas=[];
-    arraycajas=modelCaja.children[0].children[0].children;
+    maderas = [];
+    arraycajas = modelCaja.children[0].children[0].children;
     $(arraycajas).each(function(i,e){
         nombre=e.name;///1.png
-        if(nombre=="madera" || nombre=="madera2" ){
+        if(nombre == "madera" || nombre == "madera2" ){
             maderas.push(e);
         }
     })
-return maderas;
+    return maderas;
 }
 
-function INICIAR_RENDER() {
+function ANIMACION_INICIAR_RENDER() {
     clock = new THREE.Clock();
     clockCuyDudando = new THREE.Clock();
     clockCajaP = new THREE.Clock();
@@ -106,23 +91,15 @@ function INICIAR_RENDER() {
         controls.autoRotate = true;
     }
     //  controls.addEventListener( 'change',  renderer.render( scene, camera ) ); 
-
     //escena
     scene = new THREE.Scene();
-     // scene.background = new THREE.Color(0xa0a0a0);
-     // scene.fog = new THREE.Fog(0xa0a0a0, 10, 50);
      hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444);
-
-
-    // hemiLight.color.setHSL( 0.6, 1, 0.6 );
-
     hemiLight.position.set(0, 20, 0);
     scene.add(hemiLight);
      dirLight = new THREE.DirectionalLight(0xffffff);
     dirLight.position.set(-3, 20, -15);
-    // dirLight.position.set(-15, 20, -25);
     dirLight.castShadow = true;
-    camerashadow=5;
+    camerashadow = 5;
     dirLight.shadow.camera.top = camerashadow;
     dirLight.shadow.camera.bottom = -camerashadow;
     dirLight.shadow.camera.left = -camerashadow;
@@ -145,9 +122,6 @@ function INICIAR_RENDER() {
         "exponent": { value: 0.6 }
     };
         uniforms[ "topColor" ].value.copy( new THREE.Color(0.1999999,0.5199999,1) );
-    // uniforms[ "topColor" ].value.copy(dirLight.color );
-
-    // scene.fog.color.copy( uniforms[ "bottomColor" ].value );
     var skyGeo = new THREE.SphereBufferGeometry( 80, 120,60 );
     var skyMat = new THREE.ShaderMaterial( {
         uniforms: uniforms,
@@ -174,8 +148,8 @@ function INICIAR_RENDER() {
             }
         });
         modelCaja.children[0].children[0].position.y=0.28; 
-        var escalatablero=0.4;
-        var escalatablerox=0.55;
+        var escalatablero = 0.4;
+        var escalatablerox = 0.55;
         tablero =  modelCaja.children[0].children[0].children[1];
         tablero.scale.set(escalatablerox,escalatablero,escalatablero);/// suelo 
 
@@ -183,7 +157,7 @@ function INICIAR_RENDER() {
 
         modelCaja.name ="TABLA_CAJAS";
         scene.add(modelCaja);
-        cargar_archivos(); /////////////////////// animacion_cuy.js
+        animacion_cuy_cargar_archivos(); /////////////////////// animacion_cuy.js
         modelCaja.children[0].children[0].children[1].receiveShadow=true;
         CAJAS_ARRAY = modelCaja.children[0].children[0].children[0].children;
         cajax = modelCaja.children[0].children[0].children[2];
@@ -265,35 +239,6 @@ function CargarEst() {
         }
     });
 }
-
-function detener_timeout_conexionwebsockets(){
-    if(typeof revisar_ya_conecto!="undefined"){
-        clearInterval(revisar_ya_conecto);revisar_ya_conecto=null;
-    } 
-}
-function timeout_conexionwebsockets(){
-}
-function crear_toastr_websockets_error(){
-    if(ANIMACION_CUY == false){
-        if(typeof toasr_websockets_error == "undefined"){
-            toastr.options = {
-                timeOut: 0,
-                extendedTimeOut: 0,
-                tapToDismiss: false
-            };
-            toasr_websockets_error = toastr.error("Conectando a Servidor...");
-        }
-        else{
-            toasr_websockets_error.show()
-        }
-    }
-}
-
-function ocultar_toasr_websockets_error(){ 
-    if(typeof toasr_websockets_error!="undefined"){
-        toasr_websockets_error.hide();
-    }
-}
 function crear_toasr_nohay_evento(){
     if(typeof toasr_nohay_evento == "undefined"){
         toastr.options = {
@@ -315,7 +260,7 @@ function crear_toasr_servidor_error(){
             extendedTimeOut: 0,
             tapToDismiss: false
         };
-        toasr_servidor_error=toastr.error("Error Servidor...");
+        toasr_servidor_error = toastr.error("Error Servidor...");
     }
     else{
         toasr_servidor_error.show()
@@ -331,26 +276,26 @@ function ocultar_toasr_servidor_error(){
         toasr_servidor_error.hide();
     }
 }
-function iniciar_websocketservidor(){
+function animacion_iniciar_ready(){
     ocultar_cuy_cargando();
     $.LoadingOverlay("hide");
     ocultar_toasr_nohay_evento();
     ocultar_toasr_servidor_error()
-    inicio_pedir_hora = performance.now();
-    pedir_hora = true;
-    console.warn(performance.now() +" YA CONECTADO, pedir datos");
+    console.warn(performance.now() +"   ANIMACIÓN CUY , READY");
+
+    clientevistaindex_mostrar_venta();
+    EventoActual();
     //pedir_eventoJSON();///INICIO_ANIMACION_CUY despues de recibir hora de servidor ///////////////************///
-    // pedir_hora = false;
     // EVENTO_DATOS = JSON.parse(jsondecode.mensaje);
     // accion_evento(EVENTO_DATOS); /////////////////////////////////////////******//////////////////
 }
 
-OPCIONES_VENTA_VISTA = {
-    sessionToken            :   getUrlParameter('sessionToken'),
-    playerID                :   getUrlParameter('playerID'),
-    gameID                  :   getUrlParameter('gameID'),
+// OPCIONES_VENTA_VISTA = {
+//     sessionToken            :   getUrlParameter('sessionToken'),
+//     playerID                :   getUrlParameter('playerID'),
+//     gameID                  :   getUrlParameter('gameID'),
 
-}
+// }
 function getUrlParameter(name) {
     name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
     var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
@@ -360,18 +305,44 @@ function getUrlParameter(name) {
 function get_evento_ganador(id_evento){// AJAX GET GANADOR DE EVENTO E INICIAR ANIMACION CUY 
     var ajax_temp = $.ajax({
         type: 'POST',
-        url:  'ClienteVistGanadorEvento',
+        url:  'ClienteVistaGanadorEvento',
         data: {
             sessionToken :  OPCIONES_VENTA_VISTA.sessionToken,
             playerID :      OPCIONES_VENTA_VISTA.playerID,
             gameID :        OPCIONES_VENTA_VISTA.gameID,
-            'id_evento'      : id_evento,
+            id_evento    :  id_evento,
         },
         beforeSend:function(){
         },
         success: function (response) {
             EVENTO_DATOS = JSON.parse(response);
             accion_evento(EVENTO_DATOS); /////////////////////////////////////////******//////////////////
+        },
+        error:function(){}
+    });
+    return ajax_temp;
+}
+function animacion_finalizar_evento_estado(id_evento, callback){// AJAX 
+    var ajax_temp = $.ajax({
+        type: 'POST',
+        url:  'ClienteVistaFinalizarEvento',
+        data: {
+            sessionToken :  OPCIONES_VENTA_VISTA.sessionToken,
+            playerID :      OPCIONES_VENTA_VISTA.playerID,
+            gameID :        OPCIONES_VENTA_VISTA.gameID,
+            id_evento      : id_evento,
+        },
+        beforeSend:function(){
+        },
+        success: function (response) {
+            var resp = JSON.parse(response);
+            if (resp.error == false)
+            {
+                callback();
+            }
+            else {
+                toastr.error("Error Servidor...");
+            }
         },
         error:function(){}
     });
@@ -415,7 +386,7 @@ function accion_evento(DATOS) {
         if (typeof timeout_nohayevento != "undefined") {
         } else {
             timeout_nohayevento = setTimeout(function() {
-                iniciar_websocketservidor();
+                animacion_iniciar_ready();
                 clearTimeout(timeout_nohayevento);
                 delete timeout_nohayevento;
             }, 3000)
@@ -468,7 +439,7 @@ function accion_cuy(evento, seg_para_animacion , seg_para_finevento) {
                   toastr_eventofinalizo.hide();
                   clearTimeout(timeout_eventofinalizo);
                   delete timeout_eventofinalizo;
-                  iniciar_websocketservidor();
+                  animacion_iniciar_ready();
               }, 4000)
           }
       } ///else segundos_para_fin_evento >0

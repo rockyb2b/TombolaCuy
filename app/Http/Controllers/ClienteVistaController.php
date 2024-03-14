@@ -19,6 +19,148 @@ class ClienteVistaController extends Controller
     public function __construct()
     {
     }
+    public function ClienteVistaCuy(Request $request)
+    {   //?sessionToken=1&playerID=2&gameID=3
+        $sessionToken = $request->input('sessionToken');
+        $playerID = $request->input('playerID');
+        $gameID = $request->input('gameID');
+        if( !$sessionToken || !$playerID || !$gameID)
+        {
+            dd("Faltan Parámetros");
+        }
+        $error = "";
+        try {
+            $tipoapuesta = Evento::TipoApuestaListar();
+            if (count($tipoapuesta) == 0) {
+                $error = "No hay Apuestas";
+            }
+            $divzero = null;
+            $primerafila = array();
+            $segundafila = array();
+            $tercerafila = array();
+            $cuartafila = array();
+            $quintafila = array();
+            $sextafila = array();
+            $coloresfila = array();
+            $rangosfila = array();
+            $par_imparfila = array();
+            foreach ($tipoapuesta as $apuesta) {
+                if (in_array($apuesta->idTipoApuesta, [39])) {
+                    $divzero = $apuesta;
+                }
+            }
+            foreach ($tipoapuesta as $apuesta) {
+                if (in_array($apuesta->idTipoApuesta, [1, 2, 3, 4, 5, 6])) {
+                    array_push($primerafila, $apuesta);
+                }
+            }
+            foreach ($tipoapuesta as $apuesta) {
+                if (in_array($apuesta->idTipoApuesta, [7, 8, 9, 10, 11, 12])) {
+                    array_push($segundafila, $apuesta);
+                }
+            }
+            foreach ($tipoapuesta as $apuesta) {
+                if (in_array($apuesta->idTipoApuesta, [13, 14, 15, 16, 17, 18])) {
+                    array_push($tercerafila, $apuesta);
+                }
+            }
+            foreach ($tipoapuesta as $apuesta) {
+                if (in_array($apuesta->idTipoApuesta, [19, 20, 21, 22, 23, 24])) {
+                    array_push($cuartafila, $apuesta);
+                }
+            }
+            foreach ($tipoapuesta as $apuesta) {
+                if (in_array($apuesta->idTipoApuesta, [25, 26, 27, 28, 29, 30])) {
+                    array_push($quintafila, $apuesta);
+                }
+            }
+            foreach ($tipoapuesta as $apuesta) {
+                if (in_array($apuesta->idTipoApuesta, [31, 32, 33, 34, 35, 36])) {
+                    array_push($sextafila, $apuesta);
+                }
+            }
+            foreach ($tipoapuesta as $apuesta) {
+                if (in_array($apuesta->idTipoApuesta, [37, 38, 39])) {
+                    array_push($coloresfila, $apuesta);
+                }
+            }
+            foreach ($tipoapuesta as $apuesta) {
+                if (in_array($apuesta->idTipoApuesta, [40, 41, 42, 45, 46, 47, 48])) {
+                    array_push($rangosfila, $apuesta);
+                }
+            }
+            foreach ($tipoapuesta as $apuesta) {
+                if (in_array($apuesta->idTipoApuesta, [43, 44])) {
+                    array_push($par_imparfila, $apuesta);
+                }
+            }
+            //evento 
+            $event = new Evento();
+            $posiciones = $event->generar_posiciones_random();
+            $tiempo_vista_venta = env('TIEMPO_VISTA_VENTA');
+
+            // USAR EVENTO ACTIVO QUE NO FUE TERMINADO O CREAR EVENTO
+            $eventosdatos = Evento::EventoActivo(1 , $playerID , $gameID);
+            if($eventosdatos){
+                Evento::UpdateEvento($eventosdatos->idEvento);
+                $idEvento = $eventosdatos->idEvento;
+                $idPuntoVenta = 1;
+            }
+            else 
+            {
+                $fecha_inicio = date("Y-m-d H:i:s");
+                $fecha_fin = date("Y-m-d H:i:s", strtotime($fecha_inicio . " + $tiempo_vista_venta seconds"));
+                $juego = Juego::GetJuegoJson();
+                $eventosdatos = Evento::RegistrarEventoCuyTorito($juego, $fecha_inicio , $fecha_fin, $posiciones , $sessionToken , $playerID , $gameID);
+
+                $random = new BRandom();
+                $numero_random = $random->IRandom(0, 36);
+                TipoApuesta::TipoApuestaColor($numero_random, $eventosdatos->idEvento);
+            }
+            
+            $dinerodefault = Evento::DineroDefaultListar(); 
+            if (count($dinerodefault) == 0) {
+                $error = "No hay Eventos DineroDefault";
+                return view('ClienteVista.ClienteVista', compact("error"));
+            }
+        } catch (QueryException $ex) {
+            $mensaje_error = $ex->errorInfo;
+        };
+
+        $listaTipoApuesta = TipoApuesta::TipoApuestaListarJson();
+    	foreach($listaTipoApuesta as $TipoApuesta){
+    		if($TipoApuesta->idTipoApuesta == 37){
+                $color1 = $TipoApuesta->rgb;
+    			$color1Letra = $TipoApuesta->rgbLetra;
+    		}
+    		if($TipoApuesta->idTipoApuesta == 38){
+    			$color2 = $TipoApuesta->rgb;
+                $color2Letra = $TipoApuesta->rgbLetra;
+    		}
+    		 if($TipoApuesta->idTipoApuesta == 39){
+    			$color0 = $TipoApuesta->rgb;
+                $color0Letra = $TipoApuesta->rgbLetra;
+    		}
+    	}
+        $IdJuego = 1;//juego CUY
+        $resultado_evento = ResultadoEvento::ResultadosEventoJuego($IdJuego);
+        $ultimos120eventos = TipoApuesta::Ultimos120eventos($IdJuego);
+        $TipoApuestaListado = TipoApuesta::TipoApuestaListado();
+
+
+        $hora_servidor = date('Y-m-d H:i:s');
+        return view('ClienteVista.ClienteVistaCuy', compact(
+                        "sessionToken","playerID", "gameID",
+                        "hora_servidor",   "dinerodefault", "tipoapuesta",
+                        "divzero", "primerafila", "segundafila", "tercerafila", "cuartafila", "quintafila", "sextafila",
+                        "rangosfila", "par_imparfila","coloresfila","error", "eventosdatos"
+                        ,"color1","color2","color0","color1Letra","color2Letra","color0Letra","resultado_evento","ultimos120eventos","TipoApuestaListado"
+            )
+        );
+
+    }
+
+
     public function ClienteVista(Request $request)
     {   //?sessionToken=1&playerID=2&gameID=3
         $sessionToken = $request->input('sessionToken');
@@ -257,8 +399,6 @@ class ClienteVistaController extends Controller
         return response()->json(['html' => $view, 'error' => $error , 'eventoactual' => $eventosdatos
         ]);
     }
-
-
     public function EventoActual(Request $request)
     {
         $sessionToken = $request->input('sessionToken');
@@ -300,7 +440,6 @@ class ClienteVistaController extends Controller
                                 );
     }
 
-
     public function HistorialJackpotDatosJsonFk(Request $request)
     {
         $mensaje_error = "";
@@ -317,13 +456,11 @@ class ClienteVistaController extends Controller
             'jugadores'=> 1,
             'mensaje' => $mensaje_error]);
     }
-
     public function DatosEstadistica()
     {
         $estadistica = TipoApuesta::EstadisticaUltimosEventos(1);
         return response()->json(['estadistica' => $estadistica]);
     }
-
     public function GuardarApuestaCliente(Request $request)
     {
         $sessionToken = $request->input('sessionToken');
@@ -359,8 +496,6 @@ class ClienteVistaController extends Controller
             'apuestas' => $apuestas
         ]);
     }
-
-
     /*ANIMACION CUY */
     public function ClienteVistaAnimacionCuy()
     {
@@ -420,11 +555,33 @@ class ClienteVistaController extends Controller
         catch (QueryException $ex) {
             $mensaje_error = $ex->errorInfo;
         }
-        return response()->json(['respuesta' => $respuesta,
+        return response()->json([
             'mensaje' => $mensaje_error,
             'ganador' => $ganador,
             'hora_servidor' => date("Y-m-d H:i:s")
         ]);
     }
-
+    public function ClienteVistaFinalizarEvento(Request $request)
+    {
+        $sessionToken = $request->input('sessionToken');
+        $playerID = $request->input('playerID');
+        $gameID = $request->input('gameID');
+        $id_evento = $request->input('id_evento');
+        $mensaje_error = "";
+        $ganador = false;
+        try {
+            $evento = Evento::FinalizarEvento($id_evento);
+            return json_encode([
+                'error' => !$evento,
+                'hora_servidor'=>date("Y-m-d H:i:s")
+            ]);
+        } 
+        catch (QueryException $ex) {
+            $mensaje_error = $ex->errorInfo;
+        }
+        return response()->json([
+            'mensaje' => $mensaje_error,
+            'hora_servidor' => date("Y-m-d H:i:s")
+        ]);
+    }
 }
