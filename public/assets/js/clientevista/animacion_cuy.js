@@ -17,10 +17,9 @@ buscando_evento = false;
 ANIMACION_CUY = false;
 ANIMACION_CUY_PORTADA = false;
 TEXTO_NEON_PORTADA = "¿A donde va el cuy? ¡Realiza Tu Apuesta!";
-TEXTO_CONTADOR = "APUESTAS SE CIERRAN EN";
+TEXTO_CONTADOR = "SE INICIA EN ";
 TEXTO_ESPERAR_TERMINO_EVENTO = "EVENTO TERMINA EN";
 
-TIEMPO_GANADOR_PORTADA = 10000;
 function camara_mirar(objeto){
         camera.position.x = objeto.position.x ;
         camera.position.y = objeto.position.y + 1.6;
@@ -353,53 +352,49 @@ function ocultar_div_tituloevento(){
     }
 }
 function mostrar_div_ganador(){
-     // $("#DIV_GANADOR").show();
-     // ocultar_div_tituloevento();
     $("#DIV_GANADOR")
-                    .off().on("transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd",
-                                 function(e){
-                                    // do something here
-                                    $(".contenedor_cubo_ganador").addClass("latido_animacion");
-                                    $('#cubo_ganador img').shiningImage();
-                                    $(this).off(e);
-                                 });
+                .off()
+                .on("transitionend webkitTransitionEnd oTransitionEnd MSTransitionEnd",
+                    function(e){
+                        $(".contenedor_cubo_ganador").addClass("latido_animacion");
+                        $('#cubo_ganador img').shiningImage();
+                        $(this).off(e);
+                    });
     $("#DIV_GANADOR").removeClass("SIN_ANIMACION_children")
                     .show()
                     .removeClass("off");
 
-     if(typeof ganador_fireworks!=="undefined"){
+    if(typeof ganador_fireworks !== "undefined"){
         ganador_fireworks.destruir();
     }
-     if(typeof ganador_confeti!=="undefined"){
+    if(typeof ganador_confeti !== "undefined"){
         ganador_confeti.destruir();
     }
 
-        ganador_confeti=$('#DIV_GANADOR').confeti();
-        ganador_fireworks=$('#DIV_GANADOR').fireworks({
-            n_stars : 0, //num of stars
-            twinkleFactor : .4, //how much stars 'twinkle'
-            maxStarRadius : 3,
-            minStrength : 1.5, //lowest firework power
-            maxStrength : 7, //highest firework power
-            minTrails : 15, //min particles
-            maxTrails : 40, //max particles
-            particleRadius : 2,
-            trailLength : 15, //particle trail length
-            delay : .4, // number of LIFEs between explosions
-            LIFE : 50, //life time of firework
-
-                 sound: true, 
-                 opacity: 1,
-                 particles:100,
-                 width: $('#DIV_GANADOR').width(),
-                 height: $('#DIV_GANADOR').height()
-         });
-   if(typeof intervalo_cubo!=="undefined"){
+    ganador_confeti = $('#DIV_GANADOR').confeti();
+    ganador_fireworks = $('#DIV_GANADOR').fireworks({
+        n_stars : 0, //num of stars
+        twinkleFactor       : .4, //how much stars 'twinkle'
+        maxStarRadius       : 3,
+        minStrength         : 1.5, //lowest firework power
+        maxStrength         : 7, //highest firework power
+        minTrails           : 15, //min particles
+        maxTrails           : 40, //max particles
+        particleRadius      : 2,
+        trailLength         : 15, //particle trail length
+        delay               : .4, // number of LIFEs between explosions
+        LIFE                : 50, //life time of firework
+        sound               : true, 
+        opacity             : 1,
+        particles           :100,
+        width: $('#DIV_GANADOR').width(),
+        height: $('#DIV_GANADOR').height()
+    });
+   if(typeof intervalo_cubo !== "undefined"){
         clearInterval(intervalo_cubo);
     }
-    //intervalo_cubo=setInterval(function(){toggleShape()},4000)
 }
-function ocultar_div_ganador(){
+function ocultar_div_ganador(callback){
      $("#DIV_GANADOR").removeClass("latido_animacion").addClass("off").addClass("SIN_ANIMACION_children");
      $("#contenedor_cubo_ganador").removeClass("latido_animacion").addClass("off").addClass("SIN_ANIMACION_children");;
      $("#DIV_GANADOR")
@@ -409,8 +404,9 @@ function ocultar_div_ganador(){
             mostrar_div_eventoesperando();
             $('#cubo_ganador img').data('shiningImage').stopshine();
             $("#imagen_nro_ganador").data("shiningImage").destruir();
-
             $(this).off(e);
+
+            callback();
         });
     if(typeof ganador_fireworks !== "undefined"){
         ganador_fireworks.destruir();
@@ -556,15 +552,12 @@ function reiniciar_cuy(){
     $("#barra_loading_tpi").css("height","100%");
 }
 function reiniciar_loading(){
-  
-        clock = new THREE.Clock();
-        clockCuyDudando = new THREE.Clock();
-        clockCuyChoque= new THREE.Clock();
-        clockCajaP= new THREE.Clock();
-        t=0;
-        $("#barra_loading_tpi").css("height","100%");
-        //PUNTOS_CUY=null;
-        //INDICE_PUNTOS_CUY=0;
+    clock = new THREE.Clock();
+    clockCuyDudando = new THREE.Clock();
+    clockCuyChoque= new THREE.Clock();
+    clockCajaP= new THREE.Clock();
+    t = 0;
+    $("#barra_loading_tpi").css("height","100%");        
 }
 
 function getPositionOtro(ganador,otro){
@@ -669,81 +662,85 @@ function INICIO_ANIMACION_CUY(){
     SONIDOS_LOOPS.sonido_vista_cuy_ganador.pause();
     mostrar_cajagirando();
     camara_movimiento_girando(
-                    {x:X,y:Y,z:Z},
+                    {
+                        x:X , y:Y , z:Z
+                    },
                     camera,
                     2000,
                     function(){
                         iniciogiro =  performance.now();
                         camara_mirar(modelCajaP);
-                        if(typeof a!="undefined"){
+                        if(typeof a != "undefined"){
                             ULTIMO_PUNTO_CUY = a;
                         }
                         reiniciar_cuy();///reiniciar posicion cuyes 0 0 0
                         actualizar_cuyes_posicion();
-                        if(typeof controls!="undefined"){
+                        if(typeof controls != "undefined"){
                         }
                         detener_var_cajagirando();
-                        modelCajaP.visible=true;
+                        modelCajaP.visible = true;
 
                         cajagirando_animacion();
+                        actualizar_div_ganador(GANADOR_DE_EVENTO);
                     }
                 );
 }
 function actualizar_div_ganador(nro_ganador){
     var GANADOR_DE_EVENTO = nro_ganador;
     var ganador_TEXTO = GANADOR_DE_EVENTO == 0 ? "x" : GANADOR_DE_EVENTO;
-    $("#cubo_ganador img").attr("src","img/numeros/"+ganador_TEXTO+".png");
-    $("#span_idevento").text("#"+EVENTO_ID);
+    $("#cubo_ganador img").attr("src","img/numeros/" + ganador_TEXTO + ".png");
+    $("#span_idevento").text("#" + EVENTO_ID);
 }
 
 function cajagirando_animacion() {
-        var_cajagirando = requestAnimationFrame(cajagirando_animacion);
-        mixer.update(clock.getDelta());
-        mixerCuyDudando.update(clockCuyDudando.getDelta());
-        mixerCajaP.update(clockCajaP.getDelta());       
-        mostrar_cajagirando();
-        // var tiempogirando = clockCajaP.getElapsedTime() - iniciogiro;
-        var tiempogirando = performance.now() - iniciogiro;
-        renderer.render(scene, camera);
-        if(tiempogirando/1000 <= (TIEMPO_GIRO_CAJA/1000)){
+    var_cajagirando = requestAnimationFrame(cajagirando_animacion);
+    mixer.update(clock.getDelta());
+    mixerCuyDudando.update(clockCuyDudando.getDelta());
+    mixerCajaP.update(clockCajaP.getDelta());       
+    mostrar_cajagirando();
+    // var tiempogirando = clockCajaP.getElapsedTime() - iniciogiro;
+    var tiempogirando = performance.now() - iniciogiro;
+    renderer.render(scene, camera);
+    if( tiempogirando/1000 <= ( OPCIONES_CUY_VISTA.TIEMPO_GIRO_CAJA/1000) ){
+    }
+    else
+    {
+        console.info("tiempo giro =" + tiempogirando);
+        puntootro = getPositionOtroVector(GANADOR_DE_EVENTO,otro);///punto antes de caja centro
+        actualizar_div_ganador(GANADOR_DE_EVENTO);
+        // spline = new THREE.SplineCurve3(puntos_azar());
+        // detener_var_animarcamara();
+        detener_var_cajagirando();
+        mostrar_cuymoviendo();
+    
+        cajax = getObjeto_caja("x");
+        maderas = [];
+        maderas.push(getObjeto_caja("madera"));
+        maderas.push(getObjeto_caja("madera2"));
+        posicionycajaxinicial = -9.8808069229126  ;//9.932283401;//-6.86645478253922e-7;//-993.228455;///  z=>  -993.228455
+        posicionfinalcaja = -11.4;//8.2;//3.4999993133545217//800;
+        
+        //cajax_posicioninicial=cajax.getWorldPosition();
+        cajax_posicioninicial = new THREE.Vector3() ; 
+        cajax.getWorldPosition(cajax_posicioninicial);
+
+        posicionmadera = new THREE.Vector3() ; 
+        getObjeto_caja("madera").getWorldPosition(posicionmadera);
+
+        dtcajax = 0.2;
+        tcajax = 0;
+        rotacionx_inicio = 0;//-7.318557638911297e-33;
+        rotacionx_fin = -Math.PI / 2;//-1.4;
+        q1_cajax = new THREE.Quaternion().copy(cajax.quaternion);
+        q2_cajax = new THREE.Quaternion().copy(cajax.quaternion);
+        timerotacion = 0;
+
+        if(typeof controls!="undefined"){
+            controls.autoRotate = false;
         }
-        else{
-            console.info("tiempo giro ="+tiempogirando);
-            puntootro = getPositionOtroVector(GANADOR_DE_EVENTO,otro);///punto antes de caja centro
-            actualizar_div_ganador(GANADOR_DE_EVENTO);
-            // spline = new THREE.SplineCurve3(puntos_azar());
-            // detener_var_animarcamara();
-            detener_var_cajagirando();
-            mostrar_cuymoviendo();
-       
-            cajax = getObjeto_caja("x");
-            maderas = [];
-            maderas.push(getObjeto_caja("madera"));
-            maderas.push(getObjeto_caja("madera2"));
-            posicionycajaxinicial = -9.8808069229126  ;//9.932283401;//-6.86645478253922e-7;//-993.228455;///  z=>  -993.228455
-            posicionfinalcaja = -11.4;//8.2;//3.4999993133545217//800;
-            
-            //cajax_posicioninicial=cajax.getWorldPosition();
-            cajax_posicioninicial = new THREE.Vector3() ; 
-            cajax.getWorldPosition(cajax_posicioninicial);
-
-            posicionmadera = new THREE.Vector3() ; 
-            getObjeto_caja("madera").getWorldPosition(posicionmadera);
-
-            dtcajax = 0.2;
-            tcajax = 0;
-            rotacionx_inicio = 0;//-7.318557638911297e-33;
-            rotacionx_fin = -Math.PI / 2;//-1.4;
-            q1_cajax = new THREE.Quaternion().copy(cajax.quaternion);
-            q2_cajax = new THREE.Quaternion().copy(cajax.quaternion);
-            timerotacion = 0;
-
-            if(typeof controls!="undefined"){
-              controls.autoRotate = false;
-            }
-            camara_movimiento_inicio({x:0,y:10.3,z:0},camera,2500);
-            iniciar_cuy(GANADOR_DE_EVENTO,TIEMPO_CUY);
-        }
+        camara_movimiento_inicio({x:0,y:10.3,z:0},camera,2500);
+        iniciar_cuy(GANADOR_DE_EVENTO,OPCIONES_CUY_VISTA.TIEMPO_CUY);
+    }
 }
 function retornar_cajx(){
     cajax.position.y = -9.8808069229126;//9.932283401;//-993.228455; 
@@ -805,19 +802,19 @@ function generar_nueva_posicion_random2(rango){
 }
 
 function puntos_azar(){
-    arrayvector=[];
-    for(a=0;a<10;a++){
-        nuevo=generar_nueva_posicion_random2(2.35);
+    arrayvector = [];
+    for(a = 0;a < 10;a++){
+        nuevo = generar_nueva_posicion_random2(2.35);
         arrayvector.push(new THREE.Vector3(nuevo.x,0,nuevo.z))
     }
     return arrayvector;
 }
 
 function puntos_azar_inicio(inicio){
-    arrayvector=[];
+    arrayvector = [];
     arrayvector.push(new THREE.Vector3(inicio.x,0,inicio.z));
-    for(a=0;a<10;a++){
-        nuevo=generar_nueva_posicion_random2(2.35);
+    for(a = 0;a < 10;a++){
+        nuevo = generar_nueva_posicion_random2(2.35);
         arrayvector.push(new THREE.Vector3(nuevo.x,0,nuevo.z))
     }
     return arrayvector;
@@ -854,7 +851,6 @@ function correr_spline(){
         model.position.copy(posicion_fin_caja);
         t = 0;
         cancelAnimationFrame(var_correr) ;
-            // console.info("FIN SPLINE");
         CUY_CORRIENDO = false;
         if(model.position.x == posicionmadera.x && model.position.z == posicionmadera.z)
         {
@@ -960,7 +956,7 @@ function cuy_rotacionrandom() {//var_cuy_rotando
 /*agrega en solo en historial ahora*/
 function agregar_ganador_estadistica(nro_ganador){
     var ganador_objeto = {};
-    var datos = getColor(CLIENTEVISTA_ANIMACION.estadistica , nro_ganador);
+    var datos = getColor(clientevistacuy_estadistica , nro_ganador);
     ganador_objeto.idEvento = EVENTO_ID;
     ganador_objeto.valor = GANADOR_DE_EVENTO;
     ganador_objeto.rgb = datos.rgb;
@@ -985,33 +981,39 @@ function agregar_ganador_estadistica(nro_ganador){
 function callback_ganador(){
     console.warn("CALLBACK CUY GANADOR  --------");
     reiniciar_termometro();
-    tiempo_cuychoque = TIEMPO_ESPERA_CASAGANADOR; ///por defecto 1 seg,al entrar en caja
+    tiempo_cuychoque = OPCIONES_CUY_VISTA.TIEMPO_ESPERA_CASAGANADOR; ///por defecto 1 seg,al entrar en caja
     if(GANADOR_DE_EVENTO == "0" || GANADOR_DE_EVENTO == "x"){
-        tiempo_cuychoque = TIEMPO_CUY_CHOQUE;
+        tiempo_cuychoque = OPCIONES_CUY_VISTA.TIEMPO_CUY_CHOQUE;
     }
     setTimeout(function(){
+        actualizar_div_ganador(GANADOR_DE_EVENTO);
         mostrar_div_ganador();
         SONIDOS_LOOPS.sonido_vista_cuy_ganador.play();
         setTimeout(function () {
-            ocultar_div_ganador();
+            ocultar_div_ganador(
+                function(){
+                    animacion_finalizar_evento_estado( 
+                        EVENTO_ID,
+                        function(){
+                            SONIDOS_LOOPS.sonido_vista_cuy_ganador.pause();
+                            animacion_iniciar_ready();
+                            ANIMACION_CUY_PORTADA = false;
+                            INICIO_ANIMACION_CUY_PORTADA();
+                        }
+                    );
+                }
+            );
             t = 0;
             ANIMACION_CUY = false;
-            animacion_finalizar_evento_estado( 
-                EVENTO_ID,
-                function(){
-
-                    SONIDOS_LOOPS.sonido_vista_cuy_ganador.pause();
-                    animacion_iniciar_ready();
-                    ANIMACION_CUY_PORTADA = false;
-                    INICIO_ANIMACION_CUY_PORTADA();
-                }
-            );            
             // ANIMACION_CUY_PORTADA = false;
             // INICIO_ANIMACION_CUY_PORTADA();        
-        },TIEMPO_GANADOR_PORTADA);
+        },OPCIONES_CUY_VISTA.TIEMPO_GANADOR_PORTADA);
         setTimeout(function(){
             ultimos120eventos.splice(-1,1);//var def en vista
-            ultimos120eventos.unshift({ganador:GANADOR_DE_EVENTO,idEvento:EVENTO_ID});
+            ultimos120eventos.unshift({
+                ganador:GANADOR_DE_EVENTO,
+                idEvento:EVENTO_ID
+            });
             calcular_estadisticas_nuevo();
             agregar_ganador_estadistica(GANADOR_DE_EVENTO);
             GANADOR_DE_EVENTO = "";
@@ -1359,19 +1361,19 @@ function mover_cuy_rapido() {    ///var_cuymoviendo  => animationframe
         detener_var_cuy_rotando();
         actualizar_cuyes_posicion();
             if(!mover_a_ganador){
-                    mover_a_ganador=true;
-                    // b=get_caja(GANADOR_DE_EVENTO).posicion;
-                    if(GANADOR_DE_EVENTO=="x"){
-                             b=new THREE.Vector3();
-                         getObjeto_caja("madera").getWorldPosition(b);
-                    }else{
-                        b=get_caja(GANADOR_DE_EVENTO).posicion;
+                    mover_a_ganador = true;                    
+                    if(GANADOR_DE_EVENTO == "x"){
+                        b = new THREE.Vector3();
+                        getObjeto_caja("madera").getWorldPosition(b);
+                    }
+                    else{
+                        b = get_caja(GANADOR_DE_EVENTO).posicion;
                     }
             }  
             else {
                 CUY_CORRIENDO = false;
                 var posicionmadera= getObjeto_caja("madera").getWorldPosition(posicionmadera);    
-                if(model.position.x== posicionmadera.x && model.position.z== posicionmadera.z){
+                if(model.position.x == posicionmadera.x && model.position.z== posicionmadera.z){
   
                     modelCuyChoque.position.y=-0.1;
                     cuychoque();

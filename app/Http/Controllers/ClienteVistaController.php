@@ -30,6 +30,14 @@ class ClienteVistaController extends Controller
         }
         $error = "";
         try {
+            $get_account = $this->getAccount($request);//{"playerId": "47321564","balance": 192,"currency": "PEN"}
+            $balance = "0.00";
+            $currency = "";
+            if(isset($get_account["result"])){
+                $balance = $get_account["balance"];
+                $currency = $get_account["currency"];
+            }
+
             $tipoapuesta = Evento::TipoApuestaListar();
             if (count($tipoapuesta) == 0) {
                 $error = "No hay Apuestas";
@@ -155,6 +163,7 @@ class ClienteVistaController extends Controller
                         "divzero", "primerafila", "segundafila", "tercerafila", "cuartafila", "quintafila", "sextafila",
                         "rangosfila", "par_imparfila","coloresfila","error", "eventosdatos"
                         ,"color1","color2","color0","color1Letra","color2Letra","color0Letra","resultado_evento","ultimos120eventos","TipoApuestaListado"
+                        ,"balance"
             )
         );
 
@@ -288,6 +297,15 @@ class ClienteVistaController extends Controller
         {
             dd("Faltan Parámetros");
         }
+
+        $get_account = $this->getAccount($request);//{"playerId": "47321564","balance": 192,"currency": "PEN"}
+        $balance = "0.00";
+        $currency = "";
+        if(isset($get_account["result"])){
+            $balance = $get_account["balance"];
+            $currency = $get_account["currency"];
+        }
+
         $error = "";
         try {
             $hora_servidor = date('Y-m-d H:i:s');
@@ -394,7 +412,7 @@ class ClienteVistaController extends Controller
                             "hora_servidor", "dinerodefault", "tipoapuesta",
                             "divzero", "primerafila", "segundafila", "tercerafila", "cuartafila", "quintafila", "sextafila",
                             "rangosfila", "par_imparfila","coloresfila",
-                            "error", "eventosdatos")
+                            "error", "eventosdatos" , "balance")
                     ) ->render();
         return response()->json(['html' => $view, 'error' => $error , 'eventoactual' => $eventosdatos
         ]);
@@ -426,7 +444,9 @@ class ClienteVistaController extends Controller
                 $fecha_inicio = date("Y-m-d H:i:s");
                 $fecha_fin = date("Y-m-d H:i:s", strtotime($fecha_inicio . " + $tiempo_vista_venta seconds"));
                 $juego = Juego::GetJuegoJson();
-                $eventosdatos = Evento::RegistrarEventoCuyTorito($juego, $fecha_inicio , $fecha_fin, $posiciones , $sessionToken , $playerID , $gameID);
+                Evento::RegistrarEventoCuyTorito($juego, $fecha_inicio , $fecha_fin, $posiciones , $sessionToken , $playerID , $gameID);
+
+                $eventosdatos = Evento::EventoActivo(1 , $playerID , $gameID);
 
                 $random = new BRandom();
                 $numero_random = $random->IRandom(0, 36);
@@ -478,7 +498,27 @@ class ClienteVistaController extends Controller
             $ticketobjeto = $datos["TicketObjeto"];
             $apuestas = $datos["Apuestas"];
             $ticketobjeto = $request->merge($ticketobjeto);
+        
+            
             $data = Ticket::GuardarTicket($ticketobjeto);
+            $response = $this->credit($request,$data);
+
+            // Decode the JSON string into a PHP associative array
+            $responseArray = json_decode($response, true);
+
+            // Access the properties
+            if(isset($responseArray['error'])){
+                $errorCode = $responseArray['error']['code'];
+                $errorMessage = $responseArray['error']['message'];
+                return response()->json(
+                    [       'errorCode' => $errorCode,
+                            'mensaje' => $errorMessage
+                    ]
+                ); 
+
+            }
+
+            dd($response);
             $id_ticketinsertado = $data->idTicket;
             
             foreach ($apuestas as $apu) {
@@ -562,7 +602,7 @@ class ClienteVistaController extends Controller
         ]);
     }
     public function ClienteVistaFinalizarEvento(Request $request)
-    {
+    { 
         $sessionToken = $request->input('sessionToken');
         $playerID = $request->input('playerID');
         $gameID = $request->input('gameID');
@@ -570,6 +610,22 @@ class ClienteVistaController extends Controller
         $mensaje_error = "";
         $ganador = false;
         try {
+            $ganador = false;
+            if($ganador){
+                $response = $this->debit($request,$ticket);
+                $responseArray = json_decode($response, true);
+                if(isset($responseArray['error'])){
+                    $errorCode = $responseArray['error']['code'];
+                    $errorMessage = $responseArray['error']['message'];
+                    return response()->json(
+                        [       'errorCode' => $errorCode,
+                                'mensaje' => $errorMessage
+                        ]
+                    ); 
+                }
+            }
+
+
             $evento = Evento::FinalizarEvento($id_evento);
             return json_encode([
                 'error' => !$evento,
@@ -584,4 +640,159 @@ class ClienteVistaController extends Controller
             'hora_servidor' => date("Y-m-d H:i:s")
         ]);
     }
+
+
+    /////////METHODS API     
+    function getAccount(Request $request){
+        $sessionToken = $request->input('sessionToken');
+        $playerID = $request->input('playerID');
+        $gameID = $request->input('gameID');
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+        CURLOPT_URL => env('API_TORITO'),
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'POST',
+        CURLOPT_POSTFIELDS =>'{
+                "method": "getAccount",
+                "params": {
+                    "sessionToken":"$sessionToken",
+                    "playerId": "$playerID",
+                    "gameId": "$gameID"
+                }
+            }',
+        ));
+        $response = curl_exec($curl);
+
+        curl_close($curl);
+        return $response;
+        // {"result": {
+        //             "playerId": "47321564",
+        //             "balance": 192,
+        //             "currency": "PEN"
+        //         }
+        // }
+    }
+    public function debit(Request $request , $ticket){
+        $sessionToken = $request->input('sessionToken');
+        $playerID = $request->input('playerID');
+        $gameID = $request->input('gameID');
+        $amount = $request->datos['TicketObjeto']["montoTotal"];
+        $ticketId = $ticket->idTicket;
+
+        $curl = curl_init();
+        curl_setopt_array($curl, array(
+        CURLOPT_URL => 'https://dev.nexlot.pe/tga',
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'POST',
+        CURLOPT_POSTFIELDS =>'{
+            "method": "debit",
+            "params": {
+                "sessionToken":"$sessionToken",
+                "playerId": "$playerID",
+                "gameId": "$gameID"
+                "ticketId": $ticket_id,
+                "amount": $amount
+            }
+        }',
+        CURLOPT_HTTPHEADER => array(
+            'Content-Type: application/json',
+            'Authorization: Basic bGlua3RlY3VzZXI6YWJjZDEyMzQ='
+        ),
+        ));
+
+        $response = curl_exec($curl);
+        curl_close($curl);
+        return $response;
+    }
+
+    public function credit(Request $request, $ticket) {
+        $sessionToken = $request->input('sessionToken');
+        $playerID = $request->input('playerID');
+        $gameID = $request->input('gameID');
+        $amount = $request->datos['TicketObjeto']["montoTotal"];
+        $ticketId = $ticket->idTicket;
+    
+        $postData = array(
+            "method" => "credit",
+            "params" => array(
+                "playerId" => $playerID,
+                "gameId" => $gameID,
+                "ticketId" => $ticketId,
+                "amount" => $amount
+            )
+        );
+    
+        $postDataJson = json_encode($postData);
+    
+        $curl = curl_init();
+    
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => 'https://dev.nexlot.pe/tga',
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_TIMEOUT => 0,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => $postDataJson,
+            CURLOPT_HTTPHEADER => array(
+                'Content-Type: application/json',
+                'Authorization: Basic bGlua3RlY3VzZXI6YWJjZDEyMzQ='
+            ),
+        ));
+    
+        $response = curl_exec($curl);
+        curl_close($curl);
+    
+        return $response;
+    }
+    
+    // public function credit(Request $request,  $ticket){
+    //     $sessionToken = $request->input('sessionToken');
+    //     $playerID = $request->input('playerID');
+    //     $gameID = $request->input('gameID');
+    //     $amount = $request->datos['TicketObjeto']["montoTotal"];
+    //     // dd($request->datos['TicketObjeto']);
+    //     $ticketId = $ticket->idTicket;
+
+    //     $curl = curl_init();
+
+    //     curl_setopt_array($curl, array(
+    //     CURLOPT_URL => 'https://dev.nexlot.pe/tga',
+    //     CURLOPT_RETURNTRANSFER => true,
+    //     CURLOPT_ENCODING => '',
+    //     CURLOPT_MAXREDIRS => 10,
+    //     CURLOPT_TIMEOUT => 0,
+    //     CURLOPT_FOLLOWLOCATION => true,
+    //     CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+    //     CURLOPT_CUSTOMREQUEST => 'POST',
+    //     CURLOPT_POSTFIELDS =>'{
+    //         "method": "credit",
+    //         "params": {
+    //             "playerId": "$playerID",
+    //             "gameId": "$gameID",
+    //             "ticketId": "$ticketId",
+    //             "amount": $amount
+    //         }
+    //     }	',
+    //     CURLOPT_HTTPHEADER => array(
+    //         'Content-Type: application/json',
+    //         'Authorization: Basic bGlua3RlY3VzZXI6YWJjZDEyMzQ='
+    //     ),
+    //     ));
+    //     $response = curl_exec($curl);
+    //     curl_close($curl);
+    //     return $response;
+    // }
 }

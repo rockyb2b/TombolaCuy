@@ -109,7 +109,7 @@
                             display:flex;
                             align-item:center;
                             justify-content:end" 
-                        id="saldosuma">0.00
+                        id="saldosuma"><?php  echo $balance;?>
                 </div>
             </div><!--fin rowcabecera_datos-->
         </div><!--FIN rowcabecera-->

@@ -351,7 +351,6 @@ function animacion_finalizar_evento_estado(id_evento, callback){// AJAX
 function accion_evento(DATOS) {
     var  EVENTO_ACTUAL = DATOS.evento;
     EVENTO_ID = EVENTO_ACTUAL.evento_id_actual;
-    var hora_servidor = DATOS.hora_servidor;
     if (EVENTO_ID != "") {
         pedir_hora = false;
         GANADOR_DE_EVENTO = EVENTO_ACTUAL.evento_valor_ganador;
@@ -359,28 +358,15 @@ function accion_evento(DATOS) {
             console.warn(" ---  NO HAY GANADOR_DE_EVENTO " + EVENTO_ID);
         }
         $("#evento_actual_portada").text("#" + EVENTO_ID);
-        TIEMPO_GANADOR_PORTADA = 10000;
-        TIEMPO_GIRO_CAJA = (EVENTO_ACTUAL.segCajaGirando) * 1000;
-        TIEMPO_CUY = (EVENTO_ACTUAL.segBloqueoAntesAnimacion * 1000) - TIEMPO_GIRO_CAJA; //EVENTO_ACTUAL.tiempo_cuy_moviendo;
-        TIEMPO_CUY_CHOQUE = 5000;///tiempo espera cuy en estado de choque
-        TIEMPO_ESPERA_CASAGANADOR = 1000; ///tiempo espera luego q cuy entra en casa
         PUNTOS_CUY = JSON.parse(EVENTO_ACTUAL.puntos_cuy);
-        FECHA_INICIO_EVENTO = EVENTO_ACTUAL.fecha_evento_ini_actual;
-        FECHA_INICIO_EVENTO = moment(FECHA_INICIO_EVENTO, "YYYY-MM-DD HH:mm:ss a");
-        FECHA_FIN_EVENTO = EVENTO_ACTUAL.fecha_evento_fin_actual;
-        FECHA_FIN_EVENTO = moment(FECHA_FIN_EVENTO, "YYYY-MM-DD HH:mm:ss a");
-        FECHA_ANIMACION = EVENTO_ACTUAL.fecha_animacion;
-        FECHA_ANIMACION = moment(FECHA_ANIMACION, "YYYY-MM-DD HH:mm:ss a");
-        segundos_total_espera_evento=FECHA_ANIMACION.diff(FECHA_INICIO_EVENTO, 'seconds');
-
-        ahora = moment(hora_servidor); //.format("YYYY-MM-DD HH:mm:ss a");
         var segundos_para_fin_evento = 0;
         // segundos_para_animacion = FECHA_ANIMACION.diff(ahora, 'seconds');
-        var segundos_para_animacion = 3;
+        var segundos_para_animacion = OPCIONES_CUY_VISTA.SEGUNDOS_PARA_ANIMACION_CUY / 1000;
 
         accion_cuy(EVENTO_ACTUAL,segundos_para_animacion,segundos_para_fin_evento); //////////////////////////////////////////////////
 
-    } else {
+    } 
+    else {
         crear_toasr_nohay_evento();
         console.warn("No hay evento activo");
         if (typeof timeout_nohayevento != "undefined") {

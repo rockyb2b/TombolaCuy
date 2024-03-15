@@ -353,6 +353,7 @@
     <script>    
         ultimos120eventos = {!! json_encode($ultimos120eventos) !!};
         TipoApuestaListado = {!! json_encode($TipoApuestaListado) !!};
+        clientevistacuy_estadistica = null;
         calcular_estadisticas_nuevo();
         function calcular_estadisticas_nuevo(){
             $(TipoApuestaListado).each(function(i,e){
@@ -360,8 +361,8 @@
                 var Repetidos = ganador_array(valor);
                 e.Repetidos = Repetidos
             })
-            var estadistica = TipoApuestaListado;
-            calcular_estadisticas(estadistica);
+            clientevistacuy_estadistica = TipoApuestaListado;
+            calcular_estadisticas(clientevistacuy_estadistica);
         }
         function ganador_array(valorganador){
             var Repetidos = 0;

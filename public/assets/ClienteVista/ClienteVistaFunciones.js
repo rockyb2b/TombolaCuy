@@ -166,8 +166,7 @@ function iniciarContador(evento_id , duration, display ,segundosantesbloqueo) { 
                 SONIDOS_LOOPS.sonido_vista_venta_contador_final.pause();
                 detenerContador();
                 setTimeout(function(){
-                    ocultar_loadingoverlay_contador();
-                    // EventoActual();/////INICIAR ANIMACION CUY ACA
+                    ocultar_loadingoverlay_contador();                    
                     clientevistaindex_mostrar_cuy();
                     get_evento_ganador(evento_id);  //en animacion.js
                 },2000);
@@ -239,8 +238,12 @@ function GuardarTicket(eventoactual,ticketobjeto_imprimir){/////GUARDATICKET EN 
             modalguardarticket = toastr.info("...Guardando Apuestas");
         },
         success: function (response) {
-            LimpiarApuestas();
             $.LoadingOverlay("hide");
+            if(typeof response.errorCode != "undefined" ){
+                toastr.error(response.mensaje);
+                return;
+            }
+            LimpiarApuestas();
             if(typeof response.id_ticketinsertado == "undefined" ){
                 toastr.error(response.mensaje);
                 return;

@@ -2,7 +2,7 @@ OPCIONES_VENTA_VISTA = {
     sessionToken            :   getUrlParameter('sessionToken'),
     playerID                :   getUrlParameter('playerID'),
     gameID                  :   getUrlParameter('gameID'),
-    TIEMPO_VISTA_VENTA      :   8,   //30 SEC.    DURACIÓN VISTA VENTA
+    TIEMPO_VISTA_VENTA      :   88,   //30 SEC.    DURACIÓN VISTA VENTA
     SEG_BLOQUEO_ANTES_EVENTO:   2,//10,   //           PANTALLA SE BLOQUEA CUANDO FALTA __ SEGS
     TIEMPO_INTERVALO_HISTORIALJACKPOT : 3000,    //CADA CUANTO SE ACTUALIZA HISTORIAL Y JACKPOT
     USUARIO                 :    1,
@@ -47,6 +47,24 @@ OPCIONES_VENTA_VISTA = {
     intervalo_horaservidor : null , //variable setinterval para actualizar reloj
     intervalo_contador : null //variable setinterval para contador para terminar evento
 }
+
+OPCIONES_CUY_VISTA =
+{
+    SEGUNDOS_PARA_ANIMACION_CUY: 3000,// SEG. CUY ESPERA EN PORTADA 
+    TIEMPO_GIRO_CAJA           : 1000,//10000,
+    TIEMPO_CUY                 : 3000,//20000, //TIEMPO cuy jugando
+    TIEMPO_ESPERA_CASAGANADOR  : 1000, ///tiempo espera luego q cuy entra en cas,   .
+    TIEMPO_CUY_CHOQUE          : 5000,///tiempo espera cuy en estado de choqu,.
+    TIEMPO_GANADOR_PORTADA     : 10000, //TIEMPO ganador div se muestra.
+};
+
+// OPCIONES_CUY_VISTA.SEGUNDOS_PARA_ANIMACION_CUY = 3000
+// OPCIONES_CUY_VISTA.TIEMPO_GIRO_CAJA            = 10000
+// OPCIONES_CUY_VISTA.TIEMPO_CUY                  = 20000
+// OPCIONES_CUY_VISTA.TIEMPO_ESPERA_CASAGANADOR   = 1000
+// OPCIONES_CUY_VISTA.TIEMPO_CUY_CHOQUE           = 5000
+// OPCIONES_CUY_VISTA.TIEMPO_GANADOR_PORTADA      = 10000
+
 SONIDOS_LOOPS = {
     sonido_vista_venta_contador_final: (() => { 
         const audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.vista_venta_contador_final);
@@ -85,7 +103,6 @@ SONIDOS_LOOPS = {
         audio.loop = true; 
         return audio; 
     })()
-
 }
 
 
