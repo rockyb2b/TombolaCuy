@@ -517,8 +517,7 @@ class ClienteVistaController extends Controller
                 ); 
 
             }
-
-            dd($response);
+        
             $id_ticketinsertado = $data->idTicket;
             
             foreach ($apuestas as $apu) {

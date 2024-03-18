@@ -24,7 +24,8 @@ OPCIONES_VENTA_VISTA = {
         apuesta_check       : "/sound/Botones y otros/button-28.wav",
         apuesta_cancel      : "/sound/Botones y otros/button-7.wav",
         buscar_ticket       : "/sound/numeros_click.wav",
-        bet     : "/sound/Botones y otros/COINS Collect Jackpot Win 03.wav",
+        bet     : "/sound/Botones y otros/button-26.wav",
+        saldo_restar     : "/sound/Botones y otros/COINS Collect Jackpot Win 03.wav",
         contador_para_vista_cuy : "/sound/clock-ticking-4",
 
         vista_venta_contador_final : "/sound/Botones y otros/clock-ticking-4.wav",
@@ -33,7 +34,9 @@ OPCIONES_VENTA_VISTA = {
         vista_venta_bg : "/sound/Fondo/Anttis instrumentals - Background Music 2.mp3",
         vista_cuy_pasos : "/sound/Cuy/000205346_prev.mp3",
         vista_cuy_pasos_portada : "/sound/Cuy/000205346_prev.mp3",
-        vista_cuy_ganador : "/sound/Win Lose/brass-fanfare-with-timpani-and-winchimes-reverberated-146260.mp3"
+        vista_cuy_ganador : "/sound/Win Lose/brass-fanfare-with-timpani-and-winchimes-reverberated-146260.mp3",
+
+        cliente_vista_error : "sound/Win Lose/meme-fail-alert-locran-1-00-01.mp3"
     },
     sonido : 1,
     
@@ -100,11 +103,20 @@ SONIDOS_LOOPS = {
 
     sonido_vista_cuy_ganador: (() => { 
         const audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.vista_cuy_ganador);
-        audio.loop = true; 
+        // audio.loop = true; 
         return audio; 
     })()
 }
 
+SONIDOS = {
+    numeros_btns:               new Audio(OPCIONES_VENTA_VISTA.sonidos.numeros),
+    apuestas_adicionales_btns : new Audio(OPCIONES_VENTA_VISTA.sonidos.apuestas_adicionales),
+    apuestas_btns             : new Audio(OPCIONES_VENTA_VISTA.sonidos.apuestas_botones),
+    audio_bet_btn :             new Audio(OPCIONES_VENTA_VISTA.sonidos.apuestas_botones),
+    check_btn :             new Audio(OPCIONES_VENTA_VISTA.sonidos.apuesta_check),
+    cancel_btn :             new Audio(OPCIONES_VENTA_VISTA.sonidos.apuesta_cancel)
+    
+}
 
 $(document).ready(function () {   
     $("body").css("overflow","hidden");    

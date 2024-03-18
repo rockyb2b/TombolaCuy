@@ -240,11 +240,15 @@ function GuardarTicket(eventoactual,ticketobjeto_imprimir){/////GUARDATICKET EN 
         success: function (response) {
             $.LoadingOverlay("hide");
             if(typeof response.errorCode != "undefined" ){
+                var audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.cliente_vista_error);
+                audio.play();
                 toastr.error(response.mensaje);
                 return;
             }
             LimpiarApuestas();
             if(typeof response.id_ticketinsertado == "undefined" ){
+                var audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.cliente_vista_error);
+                audio.play();
                 toastr.error(response.mensaje);
                 return;
             }
@@ -418,8 +422,7 @@ function eventos_botones(eventoactual){
             var ESTA = cv_esta_ingresado(apu,idtipo_ap);
             if(!ESTA)
             {
-                var audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.apuestas_adicionales);
-                audio.play();
+                SONIDOS.apuestas_adicionales_btns.play();
                 $(this).css("cursor","pointer")
                 $(this).toggleClass("seleccionado") ;
             }
@@ -437,8 +440,7 @@ function eventos_botones(eventoactual){
             var apu = get_apuestas(eventoactual);
             var ESTA = cv_esta_ingresado(apu,idtipo_ap);
             if(!ESTA){
-                var audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.numeros);
-                audio.play();
+                SONIDOS.numeros_btns.play();
                 $(this).css("cursor","pointer")
                 $(this).toggleClass("seleccionado") ;
             }
@@ -451,8 +453,7 @@ function eventos_botones(eventoactual){
     //////botones apuesta  1 2 5  10 50 100
     $("#div_apuestas [data-tipo='apuesta']").off().on("click",function(e){
         if(typeof eventoactual != "undefined"){
-            var audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.apuestas_botones);
-            audio.play();
+            SONIDOS.apuestas_btns.play();
             $(this).toggleClass("seleccionadoapuesta") ;
             var SUMAAPUESTAS = 0;
             $("#div_apuestas .seleccionadoapuesta").each(function(ii,ee){
@@ -468,6 +469,7 @@ function eventos_botones(eventoactual){
     /////BOTONESSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS  DINERODEFAULT
     ///boton check
     $("#div_botones .check").off().on("click",function(){
+        SONIDOS.check_btn.play();
         var ID_EVENTO = $(".id_tituloconfiguracionevento").text();
         if(ID_EVENTO == ""){
             toastr.error("No hay Evento");return;
@@ -518,8 +520,7 @@ function eventos_botones(eventoactual){
             })
             console.log("apostado "+apostado+" "+valornumero)
             if(!apostado){   ////*SI NO FUE APOSTADO AUN SE  AGREGA TR A TABLA */
-                var audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.apuesta_check);
-                audio.play();
+                
                 //cuota=tiponumero=="numero"?10:tiponumero=="rango"?10:tiponumero=="pares"?11:tiponumero=="impares"?14:15;
                 FILA_PARA_TABLA.ID_EVENTO = ID_EVENTO;
                 FILA_PARA_TABLA.SELECCION = valornumero;
@@ -552,8 +553,7 @@ function eventos_botones(eventoactual){
                                     )
                     )
                     $(".divcerrarfila").off("click").on("click",function(){
-                        var audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.apuesta_cancel);
-                        audio.play();
+                        SONIDOS.cancel_btn.play();
                         var idtip = $(this).closest("tr").data("idtipoapuesta");
                         $(".apuestasadicionalescontenedor .apuestacondicional_fila .apuestacondicional_fila_datos div[data-idtipoapuesta="+idtip+"],#numeros_tabla2 .numeros_rect2 div[data-idtipoapuesta="+idtip+"]")
                             .css("cursor","pointer");
@@ -599,8 +599,7 @@ function eventos_botones(eventoactual){
 
         ///BOTON CERRAR  -- BORRAR
     $("#div_botones .cerrar").off().on("click",function(){
-        var audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.apuesta_cancel);
-        audio.play();
+        SONIDOS.cancel_btn.play();
         $(".apuestacondicional_fila_datos div").css("cursor","pointer");
         $("#numeros_tabla2 .numeros_rect2 div").css("cursor","pointer");
 
@@ -623,6 +622,8 @@ function eventos_botones(eventoactual){
 
     ///BOTON BET
     $("#div_botones .bet").off().on("click",function(){
+        // var audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.bet);
+        SONIDOS.audio_bet_btn.play();
         if(typeof eventoactual == "undefined"){
             toastr.error("No hay Evento");
             return;
@@ -636,9 +637,6 @@ function eventos_botones(eventoactual){
         }
         else
         {
-            var audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.bet);
-            audio.play();
-
             var TICKET_IMPRIMIR = {};
             TICKET_IMPRIMIR.Id_Ticket = 0;
             TICKET_IMPRIMIR.Nro_Evento = eventoactual.IdEvento;
