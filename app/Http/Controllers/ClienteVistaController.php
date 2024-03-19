@@ -678,7 +678,7 @@ class ClienteVistaController extends Controller
             
             $evento = Evento::FinalizarEvento($id_evento);
             // $evento = true;
-            return json_encode([
+            return response()->json([
                 'error' => !$evento,
                 'hora_servidor'=>date("Y-m-d H:i:s"),
                 'tickets_ganadores' => $tickets_ganadores,

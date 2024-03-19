@@ -375,7 +375,7 @@
                     </div> 
                     <div class="rowbotonesdiv cerrar icon icon-2x fa fa-close">
                     </div>                                        
-                    <div class="rowbotonesdiv bet icon icon-2x fa fa-print">
+                    <div class="rowbotonesdiv bet icon icon-2x fa ">BET
                     </div> 
                 </div>
                 <!--rowapuestas-->

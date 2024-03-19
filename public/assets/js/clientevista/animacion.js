@@ -335,8 +335,8 @@ function animacion_finalizar_evento_estado(id_evento, callback){// AJAX
         beforeSend:function(){
         },
         success: function (response) {
-            var resp = JSON.parse(response);
-            if (resp.error == false)
+            // var resp = JSON.parse(response);
+            if (response.error == false)
             {
                 callback();
             }
