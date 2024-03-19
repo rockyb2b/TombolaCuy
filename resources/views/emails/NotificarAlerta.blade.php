@@ -554,7 +554,7 @@
                                                 </p>
 
                                                 <p style="font-size: 22px; font-weight: bold; line-height: 22px; margin: 10px 0 0; padding: 0;">
-                                                    Apuesta Total - {{now()->toDateTimeString()}}
+                                                    Torito - {{now()->toDateTimeString()}}
                                                 </p>
 
 

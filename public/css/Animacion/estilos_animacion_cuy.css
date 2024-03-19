@@ -229,7 +229,7 @@ a {
 
 .cuy_cargando{
 	width:100%;height:100%;position:absolute;z-index: 10;background: 
-	rgba(0, 0, 0, 0) url(/images/imgCuyCargando.jpg) no-repeat scroll center center / 100% 100%
+	rgba(0, 0, 0, 0) url(/images/cuy_torito_cargando.jpg) no-repeat scroll center center / 100% 100%
 	;z-index:2000;background-repeat: no-repeat;background-position: center center;background-size:100% 100%
 }
 #DIV_GANADOR{
@@ -281,7 +281,9 @@ a {
 	width:20vw;
 }
 
-
+#VISTA_CUY{
+	color:white
+}
 #VISTA_CUY table{				
 	width:90%;
 	margin:auto;

@@ -2,9 +2,9 @@ OPCIONES_VENTA_VISTA = {
     sessionToken            :   getUrlParameter('sessionToken'),
     playerID                :   getUrlParameter('playerID'),
     gameID                  :   getUrlParameter('gameID'),
-    TIEMPO_VISTA_VENTA      :   88,   //30 SEC.    DURACIÓN VISTA VENTA
+    TIEMPO_VISTA_VENTA      :   8,   //30 SEC.    DURACIÓN VISTA VENTA
     SEG_BLOQUEO_ANTES_EVENTO:   2,//10,   //           PANTALLA SE BLOQUEA CUANDO FALTA __ SEGS
-    TIEMPO_INTERVALO_HISTORIALJACKPOT : 3000,    //CADA CUANTO SE ACTUALIZA HISTORIAL Y JACKPOT
+    TIEMPO_INTERVALO_HISTORIALJACKPOT : 15000,    //CADA CUANTO SE ACTUALIZA HISTORIAL Y JACKPOT
     USUARIO                 :    1,
     TIENDA                  :   $("#datoscaja #tienda").val(),
     CAJA                    :   $("#datoscaja #caja").val(),
@@ -114,13 +114,14 @@ SONIDOS = {
     apuestas_btns             : new Audio(OPCIONES_VENTA_VISTA.sonidos.apuestas_botones),
     audio_bet_btn :             new Audio(OPCIONES_VENTA_VISTA.sonidos.apuestas_botones),
     check_btn :             new Audio(OPCIONES_VENTA_VISTA.sonidos.apuesta_check),
-    cancel_btn :             new Audio(OPCIONES_VENTA_VISTA.sonidos.apuesta_cancel)
+    cancel_btn :             new Audio(OPCIONES_VENTA_VISTA.sonidos.apuesta_cancel),
+    cliente_vista_error :             new Audio(OPCIONES_VENTA_VISTA.sonidos.cliente_vista_error)
     
 }
 
 $(document).ready(function () {   
     $("body").css("overflow","hidden");    
-    EventoActual();//en ClienteVistaFunciones.js
+    //EventoActual();//en ClienteVistaFunciones.js
     ANIMACION_INICIAR_RENDER();
 
 });

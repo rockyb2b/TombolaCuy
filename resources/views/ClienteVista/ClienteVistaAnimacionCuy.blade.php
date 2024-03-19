@@ -63,7 +63,7 @@
         <div id="DIV_PAGOSHISTORIAL" class="nuevo_lados borde-lateral">
             <div class="imagen_izq_div">
                 <div class="image_corp_div">
-                    <img src="img/juegos/icontombola.fw.png" alt="apuesta total">		
+                    <img src="img/juegos/icontombola.fw.png" alt="Torito">		
                 </div>
             </div>
             <div class="pagos_titulo_div">
@@ -121,7 +121,7 @@
         <div id="DIV_ESTADISTICA"  class="nuevo_lados borde-lateral">
             <div class="imagen_div">
                 <div class="image_apuesta_div">
-                    <img src="images/logocorp2b.png" alt="apuesta total">		
+                    <img src="images/logocorp2b.png" alt="Torito" style="width:100%">		
                 </div>
             </div>
 

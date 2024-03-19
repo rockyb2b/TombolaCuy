@@ -104,7 +104,7 @@
 
             <a href="#" class="navbar-brand navbar-brand-cover">
                 <div class="navbar-brand-big" style="text-align: center;width: 100%;">
-                    <img src="{{url('../images/logocorp2b.png')}}" alt="logo apuesta total"
+                    <img src="{{url('../images/logocorp2b.png')}}" alt="logo Torito"
                          style="height: 40px;padding-top:5px;">
                 </div>
                 <div class="navbar-brand-small">
@@ -304,7 +304,7 @@
             <!-- SIDEBAR NAVIGATION -->
 
             <ul class="nav-sidebar">
-                <li><a href="{{route('Dashboard')}}" data-toggle="tooltip" title="Inicio"><i class="icon icon-inline fa fa-home"></i> <span
+                <!-- <li><a href="{{route('Dashboard')}}" data-toggle="tooltip" title="Inicio"><i class="icon icon-inline fa fa-home"></i> <span
                                 class="title">Inicio</span></a></li>
                 <li><a href="{{route('PuntoVenta.Listar')}}" data-toggle="tooltip" title="Punto Venta"><i class="icon icon-inline fa fa-inbox"></i> <span
                                 class="title">Punto Venta</span></a></li>
@@ -314,11 +314,11 @@
                 <li><a href="{{route('AperturaCaja.Listar')}}" data-toggle="tooltip" title="Apertura Caja"><i class="icon icon-inline fa fa-cube"></i> <span
                                 class="title">Apertura Caja</span></a></li>
                 <li><a href="{{route('Caja.Cierre')}}" data-toggle="tooltip" title="Cierre Caja"><i class="icon icon-inline fa fa-cube"></i> <span
-                                class="title">Cierre Caja</span></a></li>
-                <li><a href="{{route('Juego.Listar')}}" data-toggle="tooltip" title="Juegos"><i class="icon icon-inline fa fa-cube"></i> <span
+                                class="title">Cierre Caja</span></a></li> -->
+                <!-- <li><a href="{{route('Juego.Listar')}}" data-toggle="tooltip" title="Juegos"><i class="icon icon-inline fa fa-cube"></i> <span
                                 class="title">Juegos</span></a></li>
                 <li><a href="{{route('Venta.IndexNuevo')}}" data-toggle="tooltip" title="Venta"><i class="icon icon-inline fa fa-dollar"></i> <span
-                                class="title">Venta</span></a></li>
+                                class="title">Venta</span></a></li> -->
                 {{--<li class="sub">--}}
                     {{--<a href="#" class="sub-toggle">--}}
                         {{--<i class="icon icon-inline fa fa-gamepad"></i> <span class="title">Jackpot</span>--}}
@@ -359,47 +359,41 @@
                                 <span
                                         class="title">Historial Ticket</span></a></li>
 
-                        <li><a href="{{route('Reporte.Alerta')}}"><i
+                        <!-- <li><a href="{{route('Reporte.Alerta')}}"><i
                                         class="icon icon-inline fa fa-circle-thin"></i>
                                 <span
-                                        class="title">Alertas</span></a></li>
+                                        class="title">Alertas</span></a></li> -->
                     </ul>
                 </li>
-                <li><a href="{{route('ConfiguracionEvento')}}" data-toggle="tooltip" title="Configuracion General"><i class="icon icon-inline fa fa-cog"></i> <span
-                                class="title">Configuración General</span></a></li>
+                <!-- <li><a href="{{route('ConfiguracionEvento')}}" data-toggle="tooltip" title="Configuracion General"><i class="icon icon-inline fa fa-cog"></i> <span
+                                class="title">Configuración General</span></a></li> -->
                 <li class="sub">
                     <a href="#" class="sub-toggle">
                         <i class="icon icon-inline fa fa-building"></i> <span class="title">Settings Generales</span>
                     </a>
                     <ul class="sub-menu collapse" data-menu-title="Elements">
                         <li><a href="{{route('DineroDefault.Listar')}}"><i class="icon icon-inline fa fa-money"></i>
-                                <span
-                                        class="title">DineroDefault</span></a></li>
-                        <li><a href="{{route('Turno.Listar')}}"><i class="icon icon-inline fa fa-calendar"></i> <span
+                                <span class="title">DineroDefault</span></a></li>
+                        <!-- <li><a href="{{route('Turno.Listar')}}"><i class="icon icon-inline fa fa-calendar"></i> <span
                                         class="title">Turno</span></a></li>
                         <li><a href="{{route('Empresa.Listar')}}"><i class="icon icon-inline fa fa-building"></i> <span
-                                        class="title">Empresa</span></a></li>
+                                        class="title">Empresa</span></a></li> -->
                     </ul>
                 </li>
-                <li class="sub">
+                <!-- <li class="sub">
                     <a href="#" class="sub-toggle">
                         <i class="icon icon-inline fa fa-shopping-bag"></i> <span class="title">Seguridad</span>
                     </a>
                     <ul class="sub-menu collapse" data-menu-title="Progresivo">
-                        <li><a href="{{route('UsuarioPuntoVenta.Listar')}}"><i
-                                        class="icon icon-inline fa fa-circle-thin"></i> <span
-                                        class="title">Usuario Punto Venta</span></a></li>
-                        <li><a href="{{route('Seguridad.PermisosUsuario')}}"><i
-                                        class="icon icon-inline fa fa-circle-thin"></i> <span
-                                        class="title">Permisos</span></a></li>
-                        <li><a href="{{route('Auditoria')}}"><i class="icon icon-inline fa fa-circle-thin"></i> <span
-                                        class="title">Auditoria</span></a></li>
+                        <li><a href="{{route('UsuarioPuntoVenta.Listar')}}"><i class="icon icon-inline fa fa-circle-thin"></i> <span class="title">Usuario Punto Venta</span></a></li>
+                        <li><a href="{{route('Seguridad.PermisosUsuario')}}"><i class="icon icon-inline fa fa-circle-thin"></i> <span class="title">Permisos</span></a></li>
+                        <li><a href="{{route('Auditoria')}}"><i class="icon icon-inline fa fa-circle-thin"></i> <span class="title">Auditoria</span></a></li>
                         <li><a href="{{route('TipoAlerta.Listar')}}"><i class="icon icon-inline fa fa-circle-thin"></i> <span
                                         class="title">Tipo Alerta</span></a></li>
                     </ul>
                 </li>
                 <li><a href="{{route('AnimacionVista')}}" target="_blank" data-toggle="tooltip" title="Animacion Cuy"><i class="icon icon-inline fa fa-gamepad"></i> <span
-                                class="title">Animación Cuy</span></a></li>
+                                class="title">Animación Cuy</span></a></li> -->
             </ul>
         </div>
         <div class="sidebar-fixed-bottom">

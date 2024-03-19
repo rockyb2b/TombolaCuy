@@ -31,6 +31,17 @@ class GanadorEvento extends Model
         return $GanadorEvento;
     }
 
+    public static function GuardarGanadorEventoTorito($id_apuesta, $monto_pagar)
+    {
+        $ganador_evento = new GanadorEvento();
+        $ganador_evento->idApuesta  = $id_apuesta;
+        $ganador_evento->monto_pagar  = $monto_pagar;
+        $ganador_evento->fechaPago = date("Y-m-d H:i:s");
+        $ganador_evento->save();
+        return $ganador_evento;
+    }
+
+
 
   
 }

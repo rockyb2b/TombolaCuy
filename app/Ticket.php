@@ -202,27 +202,60 @@ public static function BuscarTickets_paraCancelarEventoenProceso($idTicket){
     public static function BuscarGanadoresTicketidEvento($idEvento, $idTicket)
     {
 /////////////////BUSCAR APUESTAS  DEL IDTICKET   QUE ESTEN  RESULTADO EVENTO  CON $idEvento
-        $listar = DB::select(DB::raw('select apu.idTipoApuesta ,tipapu.valorapuesta as TipoApuestaValor,tipapu.nombre as TipoApuestaNombre,tipopago.nombre as TipoPagoNombre
-            from apuesta AS apu
-            left join tipo_apuesta tipapu on tipapu.idTipoApuesta=apu.idTipoApuesta
-            left join tipo_pago tipopago on tipopago.idTipoPago=tipapu.idTipoPago
-             where apu.idTicket=(select tick.idTicket from ticket tick where tick.idTicket=' . $idTicket . ')
-             and  apu.idTipoApuesta 
-            in 
-            (
-                SELECT idTipoApuesta FROM
-                (
-                    SELECT idTipoApuesta
-                    FROM resultado_evento where idEvento=' . $idEvento . '
-                    GROUP BY idTipoApuesta
-                    
-                ) AS subquery
-            )
+        $listar = DB::select(DB::raw('SELECT apu.idTipoApuesta ,
+                                        tipapu.valorapuesta as TipoApuestaValor,
+                                        tipapu.nombre as TipoApuestaNombre,
+                                        tipopago.nombre as TipoPagoNombre
+                                    FROM apuesta AS apu
+                                    left join tipo_apuesta tipapu on tipapu.idTipoApuesta=apu.idTipoApuesta
+                                    left join tipo_pago tipopago on tipopago.idTipoPago=tipapu.idTipoPago
+                                    where apu.idTicket =(select tick.idTicket from ticket tick where tick.idTicket=' . $idTicket . ')
+                                    and  apu.idTipoApuesta 
+                                    in 
+                                    (
+                                        SELECT idTipoApuesta FROM
+                                        (
+                                            SELECT idTipoApuesta
+                                            FROM resultado_evento where idEvento=' . $idEvento . '
+                                            GROUP BY idTipoApuesta
+                                            
+                                        ) AS subquery
+                                    )
 
 
             '));
         return $listar;
     }
+
+
+    public static function EventoApuestasGanadoras($idEvento)
+    {
+        $listar = DB::select(DB::raw('SELECT t.playerID,
+                                        t.gameID,
+                                        t.sessionToken,
+                                        t.fechaRegistro,
+                                        re.idEvento,
+                                        re.idResultadosEvento ,
+                                        re.valorGanador,
+                                        re.idTipoApuesta,
+                                        a.idApuesta ,
+                                        a.idTicket  ,
+                                        a.montoApostado ,
+                                        a.multiplicadorDefecto ,
+                                        sum(a.montoApostado * a.multiplicadorDefecto ) as MontoPagar
+                                    from resultado_evento re 
+                                    INNER JOIN apuesta a ON a.idTipoApuesta = re.idTipoApuesta
+                                    LEFT JOIN ticket t on t.idTicket = a.idTicket
+                                    LEFT JOIN evento e on e.idEvento = t.idEvento
+                                    WHERE e.estadoEvento = 1 AND  re.idEvento = ' .$idEvento . '
+                                    GROUP BY t.playerID,t.gameID,t.sessionToken,re.idTipoApuesta'
+                                )
+                            );
+        return $listar;
+    }
+
+
+
 
     public static function BuscarGanadoresTicket($idTicket)
     {

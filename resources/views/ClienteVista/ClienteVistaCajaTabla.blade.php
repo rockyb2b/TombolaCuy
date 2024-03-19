@@ -432,7 +432,12 @@
 <?  //php }?>
 <!-- </div> -->
 @push('Js')
-<!-- <?php if($error!=""){?>
+<?php if($error!=""){?>
     <script>toastr.error("<?php echo $error;?>")</script>
-<?php }?> -->
+<?php }?>
+
+<?php if($get_account_error_code != "" ){ ?>
+    <script>toastr.error("<?php echo $get_account_error_message;?>")</script>
+<?php }?>
+
 @endpush

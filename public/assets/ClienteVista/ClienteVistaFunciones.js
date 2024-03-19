@@ -57,6 +57,44 @@ function EventoActual() { //results consulta  datos evento actual e inicia conta
             {
                 toastr.error(response.error);
             }
+            var response_api = response.response_api;
+            if( response_api.error ){
+                if(response_api.error.code == "5"){
+                    swal({
+                            title: "Error Api",
+                            text: "Error Api",
+                            type: "warning",
+                            showCancelButton    : false,
+                            showConfirmButton   : true,
+                            confirmButtonText   : "Yes",
+                            allowOutsideClick: false,
+                        },
+                        function(){
+                            setTimeout(function(){
+                                window.location.reload();
+                            },800)
+                        }
+                        );
+                    return false;
+                }
+                if(response_api.error.code == "3"){
+                    swal({
+                            title: "Su sesión ha terminado",
+                            text: "Debe Iniciar Sesión",
+                            type: "warning",
+                            showCancelButton    : false,
+                            showConfirmButton:false,
+                            confirmButtonText   : "Yes",
+                            allowOutsideClick: false,
+                        },
+                        function(){}
+                        );
+                    return false;
+                }
+            }
+            var balance = (response.response_api.result.balance).toFixed(2)
+            $("#saldosuma").text(balance);
+
             INICIAR(response.eventoactual);
             actualizar_evento_titulo(response.eventoactual.idEvento)
             $.LoadingOverlay("hide");
@@ -230,7 +268,7 @@ function GuardarTicket(eventoactual,ticketobjeto_imprimir){/////GUARDATICKET EN 
                 sessionToken :  OPCIONES_VENTA_VISTA.sessionToken,
                 playerID :      OPCIONES_VENTA_VISTA.playerID,
                 gameID :        OPCIONES_VENTA_VISTA.gameID,
-                'datos' : datosobjeto
+                'datos'     : datosobjeto
         },
         beforeSend:function(){
             $.LoadingOverlay("show");
@@ -239,21 +277,72 @@ function GuardarTicket(eventoactual,ticketobjeto_imprimir){/////GUARDATICKET EN 
         },
         success: function (response) {
             $.LoadingOverlay("hide");
-            if(typeof response.errorCode != "undefined" ){
-                var audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.cliente_vista_error);
-                audio.play();
-                toastr.error(response.mensaje);
-                return;
+
+            var response_api = response.response_api;
+            if( response_api.error ){
+                var error_code = response_api.error.code
+                if(error_code == "5"){
+                    swal({
+                            title: "Error Api",
+                            text: "Error Api",
+                            type: "warning",
+                            showCancelButton    : false,
+                            showConfirmButton   : true,
+                            confirmButtonText   : "Yes",
+                            allowOutsideClick: false,
+                        },
+                        function(){
+                            // setTimeout(function(){
+                            //     window.location.reload();
+                            // },800)
+                        }
+                        );
+                }
+                if(error_code == "3"){
+                    swal({
+                            title: "Su sesión ha terminado",
+                            text: "Debe Iniciar Sesión",
+                            type: "warning",
+                            showCancelButton    : false,
+                            showConfirmButton:false,
+                            confirmButtonText   : "Yes",
+                            allowOutsideClick: false,
+                        },
+                        function(){}
+                        );
+                }
+                if(error_code == "2"){//insufficient funds
+                    swal({
+                            title: "Error Api",
+                            text: "Saldo Insuficiente",
+                            type: "warning",
+                            showCancelButton    : false,
+                            showConfirmButton   : true,
+                            confirmButtonText   : "Yes",
+                            allowOutsideClick   : false,
+                        },
+                        function() {                       }
+                      );
+                }
+
+                modalguardarticket.hide();
+                SONIDOS.cliente_vista_error.play();
+                toastr.error(response.debit_error_message , "Error");
+                return false;
             }
+            var balance = (response.response_api.result.balance).toFixed(2);
+            $("#saldosuma").text(balance);
+            
             LimpiarApuestas();
             if(typeof response.id_ticketinsertado == "undefined" ){
-                var audio = new Audio(OPCIONES_VENTA_VISTA.sonidos.cliente_vista_error);
-                audio.play();
+                SONIDOS.cliente_vista_error.play();
                 toastr.error(response.mensaje);
                 return;
             }
+
             var ticketdata = response.id_ticketinsertado;
-            var idticket = ticketdata.idTicket;            
+            var idticket = ticketdata.idTicket;
+            modalguardarticket.hide();
             toastr.success("Apuesta Guardada");
         },
         error: function (jqXHR, textStatus, errorThrown) {
