@@ -42,10 +42,9 @@ class JobCommand3 extends Command
     public function handle()
     {
         $random = new BRandom();
-        $eventos = Evento::EventosDiaActualGenerados();
+        $eventos = Evento::EventosDiaActualGenerados();//lista  eventos del dia desde config  Horainicio hasta Horafin
         $lista = [];
-        foreach ($eventos as $e) {
-            // $numero_random = rand(0, 36);
+        foreach ($eventos as $e) {            
             $numero_random = $random->IRandom(0, 36);
             $totalValorGanador = ResultadoEvento::ValidarCantidadValorGanadorEvento($e->idEvento);
             if(count($totalValorGanador) == 0){
